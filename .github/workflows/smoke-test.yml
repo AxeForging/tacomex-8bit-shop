@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Start app and wait for healthy
-        uses: machado144/tacomex-8bit-shop/.github/actions/start-app@main
+        uses: AxeForging/tacomex-8bit-shop/.github/actions/start-app@main
         with:
           health-timeout: "120"
 

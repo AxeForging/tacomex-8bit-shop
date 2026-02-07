@@ -15,7 +15,7 @@ A full-stack retro-themed Mexican food delivery platform built with Fastify, Rea
 ## Quick Start
 
 ```bash
-git clone https://github.com/machado144/tacomex-8bit-shop.git
+git clone https://github.com/AxeForging/tacomex-8bit-shop.git
 cd tacomex-8bit-shop
 docker compose up --build
 ```
@@ -202,7 +202,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Start app
-        uses: machado144/tacomex-8bit-shop/.github/actions/start-app@main
+        uses: AxeForging/tacomex-8bit-shop/.github/actions/start-app@main
         with:
           health-timeout: "120"
 
