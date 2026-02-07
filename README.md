@@ -196,22 +196,38 @@ This repo includes a **composite action** at `.github/actions/start-app/` that s
 
 The action works from **any repo** — it automatically clones the TacoMex source, builds, and starts everything. Your workspace stays untouched for your own code and tests.
 
-### From another repo (default)
+### From another repo (e.g. a separate Playwright test suite)
 
 ```yaml
+# .github/workflows/e2e.yml in your test repo
+name: E2E Tests
+
+on: [push, pull_request]
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4  # your own repo
+      - uses: actions/checkout@v4  # checks out YOUR test repo
 
       - name: Start TacoMex app
         uses: AxeForging/tacomex-8bit-shop/.github/actions/start-app@main
 
-      # TacoMex is running on localhost:3001 (API) and localhost:5173 (frontend)
-      # Your workspace still has your own repo checked out
-      - run: npm test
+      # At this point:
+      #   - TacoMex API is running on localhost:3001
+      #   - Frontend is running on localhost:5173
+      #   - Your workspace still has YOUR repo's files
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - run: npx playwright test
 ```
+
+The action clones the TacoMex source into a `.tacomex-app/` subdirectory, builds and starts everything via Docker Compose, then waits for the health check to pass. Your workspace stays clean with your own code.
 
 ### Inside the TacoMex repo
 
