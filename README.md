@@ -205,13 +205,23 @@ jobs:
         uses: AxeForging/tacomex-8bit-shop/.github/actions/start-app@main
         with:
           health-timeout: "120"
+          install-frontend-deps: "true"
 
       # App is running — add your test steps here
-      - run: npx playwright test
+      - run: npx playwright install --with-deps && npx playwright test
         working-directory: frontend
 ```
 
-**Inputs:** `health-timeout` (default `120`), `health-url` (default `http://localhost:3001/health`), `docker-compose-file` (default `docker-compose.yaml`).
+**Inputs:**
+
+| Input | Default | Description |
+|-------|---------|-------------|
+| `health-timeout` | `180` | Max seconds to wait for the health check |
+| `health-url` | `http://localhost:3001/health` | Health endpoint URL to poll |
+| `docker-compose-file` | `docker-compose.yaml` | Path to docker-compose file |
+| `working-directory` | `.` | Directory where the project was checked out |
+| `install-frontend-deps` | `false` | Install frontend deps on the host and restart the container (needed for Playwright) |
+| `frontend-dir` | `frontend` | Relative path to frontend directory |
 
 ## License
 

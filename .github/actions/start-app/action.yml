@@ -14,6 +14,18 @@ inputs:
     description: "Path to docker-compose file"
     required: false
     default: "docker-compose.yaml"
+  working-directory:
+    description: "Directory where the project was checked out (where docker-compose.yaml lives)"
+    required: false
+    default: "."
+  install-frontend-deps:
+    description: "Install frontend deps on the host and restart the container (needed for Playwright)"
+    required: false
+    default: "false"
+  frontend-dir:
+    description: "Relative path to frontend directory (used when install-frontend-deps is true)"
+    required: false
+    default: "frontend"
 
 runs:
   using: "composite"
@@ -38,10 +50,12 @@ runs:
 
     - name: Start services
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       run: docker compose -f ${{ inputs.docker-compose-file }} up --build -d
 
     - name: Wait for app to be ready
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       run: |
         echo "Waiting for ${{ inputs.health-url }} (timeout: ${{ inputs.health-timeout }}s)..."
         elapsed=0
@@ -61,3 +75,17 @@ runs:
         done
         echo "App is healthy after ${elapsed}s"
         curl -sf "${{ inputs.health-url }}" | python3 -m json.tool
+
+    - name: Install frontend deps on host
+      if: inputs.install-frontend-deps == 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}/${{ inputs.frontend-dir }}
+      run: |
+        sudo rm -rf node_modules
+        npm ci
+
+    - name: Restart frontend to pick up fresh deps
+      if: inputs.install-frontend-deps == 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: docker compose -f ${{ inputs.docker-compose-file }} restart frontend && sleep 5
