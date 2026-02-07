@@ -40,6 +40,30 @@ The seed service runs automatically on first start and populates the database wi
 
 `TACO20` `BURRITO10` `FIRSTORDER` `FREEDELIVERY` `8BITDEAL`
 
+## Connecting to Services
+
+### PostgreSQL
+
+```
+Host: localhost
+Port: 5432
+Database: tacomex_shop
+User: tacomex
+Password: tacomex_secret
+```
+
+```bash
+psql postgresql://tacomex:tacomex_secret@localhost:5432/tacomex_shop
+```
+
+### Redis
+
+No password required.
+
+```bash
+redis-cli -h localhost -p 6379
+```
+
 ## API Endpoints
 
 ### Auth (`/api/auth`)
