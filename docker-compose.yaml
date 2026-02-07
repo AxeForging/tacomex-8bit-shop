@@ -1,0 +1,89 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: tacomex-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: tacomex-db
+    environment:
+      POSTGRES_USER: tacomex
+      POSTGRES_PASSWORD: tacomex_secret
+      POSTGRES_DB: tacomex_shop
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tacomex -d tacomex_shop"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tacomex-backend
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://tacomex:tacomex_secret@postgres:5432/tacomex_shop
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: tacomex_jwt_super_secret_key_8bit
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: npm run dev
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tacomex-frontend
+    environment:
+      VITE_API_URL: /api
+      VITE_PROXY_TARGET: http://backend:3001
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    command: npm run dev -- --host
+
+  seed:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tacomex-seed
+    environment:
+      DATABASE_URL: postgresql://tacomex:tacomex_secret@postgres:5432/tacomex_shop
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: npm run seed
+    restart: "no"
+
+volumes:
+  postgres_data:
+  redis_data:

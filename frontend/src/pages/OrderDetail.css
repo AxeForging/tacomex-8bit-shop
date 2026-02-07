@@ -1,0 +1,419 @@
+.order-detail {
+  min-height: 100vh;
+  background-color: #1a1a2e;
+}
+
+.order-detail__loading,
+.order-detail__error {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.order-detail__error-icon {
+  font-size: 4rem;
+}
+
+.order-detail__error-text {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #DC143C;
+}
+
+/* Success banner */
+.order-detail__success {
+  background: linear-gradient(90deg, #00A86B 0%, #228B22 100%);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  animation: success-slide 0.5s steps(8);
+}
+
+@keyframes success-slide {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+.order-detail__success-icon {
+  font-size: 2.5rem;
+  animation: success-bounce 1s ease-in-out infinite;
+}
+
+@keyframes success-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.order-detail__success-content {
+  text-align: center;
+}
+
+.order-detail__success-content h2 {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.875rem;
+  color: #FFFFFF;
+  margin-bottom: 8px;
+}
+
+.order-detail__success-content p {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Header */
+.order-detail__header {
+  background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+  padding: 32px 16px;
+  border-bottom: 4px solid #FF6B35;
+}
+
+.order-detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: #B8B8D0;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: color 0.1s steps(2);
+}
+
+.order-detail__back:hover {
+  color: #FFD700;
+}
+
+.order-detail__header-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.order-detail__title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.25rem;
+  color: #FFD700;
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+.order-detail__date {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  color: #B8B8D0;
+}
+
+/* Container */
+.order-detail__container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Section title */
+.order-detail__section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.75rem;
+  color: #FFD700;
+  margin-bottom: 16px;
+}
+
+/* Timeline */
+.order-detail__timeline-section {
+  background-color: #1f4068;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  padding: 24px;
+}
+
+.order-detail__cancelled {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: rgba(220, 20, 60, 0.2);
+  border: 2px solid #DC143C;
+}
+
+.order-detail__cancelled-icon {
+  font-size: 2rem;
+}
+
+.order-detail__cancelled p {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #DC143C;
+}
+
+.order-detail__timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.order-detail__step {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  position: relative;
+  padding-bottom: 24px;
+}
+
+.order-detail__step:last-child {
+  padding-bottom: 0;
+}
+
+.order-detail__step-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #16213e;
+  border: 3px solid #6B6B80;
+  font-size: 1rem;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.order-detail__step--completed .order-detail__step-icon {
+  background-color: #00A86B;
+  border-color: #00A86B;
+  color: #FFFFFF;
+}
+
+.order-detail__step--current .order-detail__step-icon {
+  background-color: #FFD700;
+  border-color: #FFD700;
+  animation: step-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes step-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.order-detail__step-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+}
+
+.order-detail__step-label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #6B6B80;
+}
+
+.order-detail__step--completed .order-detail__step-label,
+.order-detail__step--current .order-detail__step-label {
+  color: #FFFFFF;
+}
+
+.order-detail__step-time {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.35rem;
+  color: #B8B8D0;
+}
+
+.order-detail__step-line {
+  position: absolute;
+  left: 18px;
+  top: 40px;
+  width: 4px;
+  height: calc(100% - 40px);
+  background-color: #6B6B80;
+}
+
+.order-detail__step-line--completed {
+  background-color: #00A86B;
+}
+
+/* Items */
+.order-detail__items-section {
+  background-color: #1f4068;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  padding: 24px;
+}
+
+.order-detail__items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.order-detail__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background-color: #16213e;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.order-detail__item-qty {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #FFD700;
+  min-width: 32px;
+}
+
+.order-detail__item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.order-detail__item-name {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #FFFFFF;
+}
+
+.order-detail__item-options {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #00A86B;
+}
+
+.order-detail__item-instructions {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.35rem;
+  color: #9B59B6;
+  font-style: italic;
+}
+
+.order-detail__item-price {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #00A86B;
+}
+
+/* Address */
+.order-detail__address-section {
+  background-color: #1f4068;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  padding: 24px;
+}
+
+.order-detail__address p {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+  line-height: 2;
+}
+
+.order-detail__instructions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.order-detail__instructions-label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  color: #FFD700;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.order-detail__instructions p {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  color: #9B59B6;
+  font-style: italic;
+}
+
+/* Summary */
+.order-detail__summary-section {
+  background-color: #1f4068;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  padding: 24px;
+}
+
+.order-detail__summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.order-detail__summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+}
+
+.order-detail__summary-row--discount {
+  color: #00A86B;
+}
+
+.order-detail__summary-row--total {
+  font-size: 0.875rem;
+  color: #FFD700;
+  padding-top: 12px;
+  border-top: 2px dashed rgba(255, 255, 255, 0.2);
+  margin-top: 8px;
+}
+
+/* ETA */
+.order-detail__eta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: rgba(255, 215, 0, 0.1);
+  border: 2px solid #FFD700;
+}
+
+.order-detail__eta span {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #FFD700;
+}
+
+/* Actions */
+.order-detail__actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .order-detail__title {
+    font-size: 0.875rem;
+  }
+
+  .order-detail__header-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .order-detail__success {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .order-detail__actions {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,13 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  start-and-test:
+    uses: ./.github/workflows/start-app.yml
+    with:
+      health-timeout: 120

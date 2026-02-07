@@ -1,0 +1,378 @@
+.product-detail {
+  min-height: 100vh;
+  background-color: #1a1a2e;
+  padding: 24px 16px;
+}
+
+.product-detail__loading,
+.product-detail__error {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.product-detail__error-icon {
+  font-size: 4rem;
+}
+
+.product-detail__error-text {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.75rem;
+  color: #DC143C;
+}
+
+/* Back button */
+.product-detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: #B8B8D0;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 24px;
+  transition: color 0.1s steps(2);
+}
+
+.product-detail__back:hover {
+  color: #FFD700;
+}
+
+/* Container */
+.product-detail__container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+}
+
+/* Image section */
+.product-detail__image-section {
+  position: relative;
+}
+
+.product-detail__image {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+  border: 4px solid #FFFFFF;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    inset -4px -4px 0 rgba(0,0,0,0.2),
+    inset 4px 4px 0 rgba(255,255,255,0.1),
+    8px 8px 0 rgba(0, 0, 0, 0.5);
+}
+
+.product-detail__image-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 16px,
+      rgba(255, 255, 255, 0.02) 16px,
+      rgba(255, 255, 255, 0.02) 32px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 16px,
+      rgba(255, 255, 255, 0.02) 16px,
+      rgba(255, 255, 255, 0.02) 32px
+    );
+}
+
+.product-detail__emoji {
+  font-size: 12rem;
+  z-index: 1;
+  animation: product-float 3s ease-in-out infinite;
+  filter: drop-shadow(8px 8px 0 rgba(0, 0, 0, 0.3));
+}
+
+@keyframes product-float {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-16px) rotate(3deg); }
+}
+
+.product-detail__featured-badge {
+  position: absolute;
+  top: 16px;
+  left: -8px;
+  background-color: #FFD700;
+  color: #1a1a2e;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  padding: 8px 16px;
+  border: 4px solid #FFFFFF;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+  animation: badge-pulse 1s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.product-detail__unavailable {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+  background-color: rgba(220, 20, 60, 0.9);
+  color: #FFFFFF;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.75rem;
+  padding: 16px 24px;
+  border: 4px solid #FFFFFF;
+  z-index: 10;
+}
+
+/* Info section */
+.product-detail__info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.product-detail__category {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #FF6B35;
+  text-transform: uppercase;
+}
+
+.product-detail__name {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.25rem;
+  color: #FFD700;
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+  line-height: 1.4;
+}
+
+.product-detail__price {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.5rem;
+  color: #00A86B;
+}
+
+.product-detail__spice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.product-detail__spice-label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+}
+
+.product-detail__description {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+  line-height: 2;
+  padding: 16px;
+  background-color: #16213e;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Options */
+.product-detail__options {
+  margin-top: 8px;
+}
+
+.product-detail__options-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #FFD700;
+  margin-bottom: 12px;
+}
+
+.product-detail__options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-detail__option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background-color: #16213e;
+  border: 2px solid #B8B8D0;
+  cursor: pointer;
+  transition: all 0.1s steps(2);
+}
+
+.product-detail__option:hover {
+  border-color: #FFD700;
+}
+
+.product-detail__option--selected {
+  background-color: #00A86B;
+  border-color: #00A86B;
+}
+
+.product-detail__option-check {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+
+.product-detail__option--selected .product-detail__option-check {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.product-detail__option-name {
+  flex: 1;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #FFFFFF;
+  text-align: left;
+}
+
+.product-detail__option-price {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #FFD700;
+}
+
+/* Special instructions */
+.product-detail__instructions {
+  margin-top: 8px;
+}
+
+.product-detail__instructions-label {
+  display: block;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+  margin-bottom: 8px;
+}
+
+.product-detail__instructions-input {
+  width: 100%;
+  padding: 12px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  background-color: #16213e;
+  border: 2px solid #B8B8D0;
+  color: #FFFFFF;
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.8;
+}
+
+.product-detail__instructions-input:focus {
+  outline: none;
+  border-color: #FFD700;
+}
+
+.product-detail__instructions-input::placeholder {
+  color: #6B6B80;
+}
+
+/* Actions */
+.product-detail__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.product-detail__quantity {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #16213e;
+  border: 4px solid #FFFFFF;
+  padding: 4px;
+}
+
+.product-detail__quantity-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FF6B35;
+  border: none;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.1s steps(2);
+}
+
+.product-detail__quantity-btn:hover:not(:disabled) {
+  background-color: #FFD700;
+  color: #1a1a2e;
+}
+
+.product-detail__quantity-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.product-detail__quantity-value {
+  min-width: 48px;
+  text-align: center;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1rem;
+  color: #FFFFFF;
+}
+
+/* Decoration */
+.product-detail__decoration {
+  margin-top: 24px;
+}
+
+.product-detail__pixel-row {
+  display: flex;
+  gap: 0;
+}
+
+.product-detail__pixel-row span {
+  width: 12.5%;
+  height: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .product-detail__container {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .product-detail__emoji {
+    font-size: 8rem;
+  }
+
+  .product-detail__name {
+    font-size: 1rem;
+  }
+
+  .product-detail__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .product-detail__quantity {
+    justify-content: center;
+  }
+}

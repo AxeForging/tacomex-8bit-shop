@@ -1,0 +1,168 @@
+/* Admin Users specific styles */
+.admin-users__search-bar {
+  margin-bottom: 24px;
+}
+
+.admin-users__search {
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background-color: #16213e;
+  border: 3px solid #B8B8D0;
+}
+
+.admin-users__search:focus-within {
+  border-color: #FFD700;
+}
+
+.admin-users__search svg {
+  color: #6B6B80;
+  flex-shrink: 0;
+}
+
+.admin-users__search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #FFFFFF;
+}
+
+.admin-users__search input:focus {
+  outline: none;
+}
+
+.admin-users__search input::placeholder {
+  color: #6B6B80;
+}
+
+/* Users list */
+.admin-users__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-users__card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 20px !important;
+}
+
+.admin-users__avatar {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #16213e;
+  border: 3px solid #9B59B6;
+  color: #9B59B6;
+  flex-shrink: 0;
+}
+
+.admin-users__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-users__name {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #FFFFFF;
+  margin-bottom: 6px;
+}
+
+.admin-users__email {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #B8B8D0;
+  margin-bottom: 4px;
+}
+
+.admin-users__joined {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.35rem;
+  color: #6B6B80;
+}
+
+.admin-users__role {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.admin-users__role-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  text-transform: uppercase;
+  border: 2px solid;
+}
+
+.admin-users__role-badge--customer {
+  border-color: #00A86B;
+  color: #00A86B;
+}
+
+.admin-users__role-badge--admin {
+  border-color: #FFD700;
+  color: #FFD700;
+  background-color: rgba(255, 215, 0, 0.1);
+}
+
+.admin-users__role-select {
+  padding: 6px 10px;
+  background-color: #16213e;
+  border: 2px solid #B8B8D0;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.admin-users__role-select:focus {
+  outline: none;
+  border-color: #FFD700;
+}
+
+/* Empty state */
+.admin-users__empty {
+  text-align: center;
+  padding: 64px;
+}
+
+.admin-users__empty span {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.admin-users__empty p {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #B8B8D0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-users__card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .admin-users__role {
+    align-items: center;
+  }
+}

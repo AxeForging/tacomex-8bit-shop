@@ -1,0 +1,400 @@
+.menu {
+  min-height: 100vh;
+  background-color: #1a1a2e;
+}
+
+/* Header */
+.menu__header {
+  background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+  padding: 48px 16px;
+  border-bottom: 4px solid #FF6B35;
+}
+
+.menu__header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.menu__title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.5rem;
+  color: #FFD700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+}
+
+.menu__title-icon {
+  font-size: 2.5rem;
+  animation: title-bounce 2s ease-in-out infinite;
+}
+
+@keyframes title-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.menu__subtitle {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+}
+
+/* Container */
+.menu__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+/* Controls */
+.menu__controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.menu__search {
+  flex: 1;
+  min-width: 200px;
+  max-width: 400px;
+  position: relative;
+}
+
+.menu__search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6B6B80;
+  pointer-events: none;
+}
+
+.menu__search-input {
+  width: 100%;
+  padding: 12px 40px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  background-color: #16213e;
+  border: 4px solid #B8B8D0;
+  color: #FFFFFF;
+  transition: border-color 0.1s steps(2);
+}
+
+.menu__search-input:focus {
+  outline: none;
+  border-color: #FFD700;
+}
+
+.menu__search-input::placeholder {
+  color: #6B6B80;
+}
+
+.menu__search-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #B8B8D0;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.menu__search-clear:hover {
+  color: #DC143C;
+}
+
+.menu__filter-toggle {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #1f4068;
+  border: 4px solid #B8B8D0;
+  color: #B8B8D0;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.1s steps(2);
+}
+
+.menu__filter-toggle:hover {
+  border-color: #FFD700;
+  color: #FFD700;
+}
+
+.menu__filter-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  background-color: #DC143C;
+  color: #FFFFFF;
+  font-size: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #FFFFFF;
+}
+
+.menu__clear-filters {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 2px solid #DC143C;
+  color: #DC143C;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  cursor: pointer;
+  transition: all 0.1s steps(2);
+}
+
+.menu__clear-filters:hover {
+  background-color: #DC143C;
+  color: #FFFFFF;
+}
+
+/* Filters */
+.menu__filters {
+  background-color: #16213e;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.menu__filter-section {
+  margin-bottom: 20px;
+}
+
+.menu__filter-section:last-child {
+  margin-bottom: 0;
+}
+
+.menu__filter-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #FFD700;
+  margin-bottom: 12px;
+}
+
+.menu__category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.menu__category-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background-color: #1f4068;
+  border: 2px solid #B8B8D0;
+  color: #B8B8D0;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  cursor: pointer;
+  transition: all 0.1s steps(2);
+}
+
+.menu__category-btn:hover {
+  border-color: #FFD700;
+  color: #FFD700;
+}
+
+.menu__category-btn--active {
+  background-color: #FF6B35;
+  border-color: #FF6B35;
+  color: #FFFFFF;
+}
+
+.menu__category-emoji {
+  font-size: 1rem;
+}
+
+.menu__spice-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.menu__spice-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background-color: #1f4068;
+  border: 2px solid #B8B8D0;
+  color: #B8B8D0;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  cursor: pointer;
+  transition: all 0.1s steps(2);
+  min-width: 60px;
+}
+
+.menu__spice-btn:hover {
+  border-color: #FF6347;
+  color: #FF6347;
+}
+
+.menu__spice-btn--active {
+  background-color: #FF6347;
+  border-color: #FF6347;
+  color: #FFFFFF;
+}
+
+.menu__spice-label {
+  margin-top: 4px;
+}
+
+/* Results info */
+.menu__results-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.menu__results-count {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+}
+
+.menu__results-filtered {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #FFD700;
+}
+
+/* Products Grid */
+.menu__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+/* Loading State */
+.menu__loading {
+  display: flex;
+  justify-content: center;
+  padding: 64px;
+}
+
+/* Error State */
+.menu__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 64px;
+  text-align: center;
+}
+
+.menu__error-icon {
+  font-size: 3rem;
+}
+
+.menu__error-text {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #DC143C;
+}
+
+/* Empty State */
+.menu__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 64px;
+  text-align: center;
+}
+
+.menu__empty-icon {
+  font-size: 4rem;
+  animation: empty-pulse 2s ease-in-out infinite;
+}
+
+@keyframes empty-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.menu__empty-text {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.875rem;
+  color: #FFD700;
+}
+
+.menu__empty-subtext {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .menu__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .menu__title {
+    font-size: 1rem;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .menu__filter-toggle {
+    display: flex;
+  }
+
+  .menu__filters {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    margin: 0;
+    overflow-y: auto;
+  }
+
+  .menu__filters--open {
+    display: block;
+  }
+
+  .menu__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .menu__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .menu__controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .menu__search {
+    max-width: 100%;
+  }
+}

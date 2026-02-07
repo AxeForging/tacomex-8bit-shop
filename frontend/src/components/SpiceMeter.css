@@ -1,0 +1,76 @@
+.spice-meter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spice-meter__chilies {
+  display: flex;
+  gap: 2px;
+}
+
+.spice-meter__chili {
+  display: inline-block;
+  transition: transform 0.1s steps(2);
+}
+
+.spice-meter__chili--active {
+  animation: chili-pulse 0.5s ease-in-out infinite alternate;
+}
+
+.spice-meter__chili-svg {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Sizes */
+.spice-meter--sm .spice-meter__chili-svg {
+  width: 12px;
+  height: 18px;
+}
+
+.spice-meter--md .spice-meter__chili-svg {
+  width: 16px;
+  height: 24px;
+}
+
+.spice-meter--lg .spice-meter__chili-svg {
+  width: 24px;
+  height: 36px;
+}
+
+.spice-meter__label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #FF6347;
+  text-transform: uppercase;
+}
+
+.spice-meter--sm .spice-meter__label {
+  font-size: 0.4rem;
+}
+
+.spice-meter--lg .spice-meter__label {
+  font-size: 0.625rem;
+}
+
+@keyframes chili-pulse {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+/* Hover effect on active chilies */
+.spice-meter__chili--active:hover {
+  animation: chili-shake 0.3s ease-in-out;
+}
+
+@keyframes chili-shake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+}

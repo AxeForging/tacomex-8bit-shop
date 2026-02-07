@@ -1,0 +1,438 @@
+/* =====================================================
+   ADMIN PAGES STYLES
+   ===================================================== */
+
+.admin {
+  display: flex;
+  min-height: 100vh;
+  background-color: #1a1a2e;
+}
+
+.admin__loading,
+.admin__error {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.admin__error-icon {
+  font-size: 4rem;
+}
+
+.admin__error p {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #DC143C;
+}
+
+/* Sidebar */
+.admin__sidebar {
+  width: 240px;
+  background-color: #16213e;
+  border-right: 4px solid #FF6B35;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.admin__sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin__sidebar-icon {
+  font-size: 2rem;
+}
+
+.admin__sidebar-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.875rem;
+  color: #FFD700;
+}
+
+.admin__nav {
+  flex: 1;
+  padding: 16px 0;
+}
+
+.admin__nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+  text-decoration: none;
+  transition: all 0.1s steps(2);
+  border-left: 4px solid transparent;
+}
+
+.admin__nav-link:hover {
+  background-color: rgba(255, 215, 0, 0.1);
+  color: #FFD700;
+  border-left-color: #FFD700;
+}
+
+.admin__nav-link--active {
+  background-color: rgba(255, 107, 53, 0.2);
+  color: #FF6B35;
+  border-left-color: #FF6B35;
+}
+
+.admin__sidebar-footer {
+  padding: 20px;
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin__back-link {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  color: #B8B8D0;
+  text-decoration: none;
+  transition: color 0.1s steps(2);
+}
+
+.admin__back-link:hover {
+  color: #FFD700;
+}
+
+/* Main content */
+.admin__main {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.admin__header {
+  margin-bottom: 32px;
+}
+
+.admin__title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.25rem;
+  color: #FFD700;
+  margin-bottom: 8px;
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+.admin__subtitle {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+}
+
+/* Stats Grid */
+.admin__stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.admin__stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px !important;
+}
+
+.admin__stat-icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid currentColor;
+}
+
+.admin__stat-icon--orders {
+  color: #FF6B35;
+  background-color: rgba(255, 107, 53, 0.2);
+}
+
+.admin__stat-icon--revenue {
+  color: #00A86B;
+  background-color: rgba(0, 168, 107, 0.2);
+}
+
+.admin__stat-icon--customers {
+  color: #9B59B6;
+  background-color: rgba(155, 89, 182, 0.2);
+}
+
+.admin__stat-icon--products {
+  color: #FFD700;
+  background-color: rgba(255, 215, 0, 0.2);
+}
+
+.admin__stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin__stat-value {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1rem;
+  color: #FFFFFF;
+}
+
+.admin__stat-label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #B8B8D0;
+  text-transform: uppercase;
+}
+
+/* Today */
+.admin__today {
+  margin-bottom: 24px;
+}
+
+.admin__today-card {
+  padding: 20px !important;
+}
+
+.admin__today-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #FFD700;
+  margin-bottom: 16px;
+}
+
+.admin__today-stats {
+  display: flex;
+  gap: 48px;
+}
+
+.admin__today-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin__today-value {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.25rem;
+  color: #00A86B;
+}
+
+.admin__today-label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #B8B8D0;
+}
+
+/* Content Grid */
+.admin__content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+/* Card header */
+.admin__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.admin__card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #FFD700;
+}
+
+.admin__view-all {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #00A86B;
+  text-decoration: none;
+  transition: color 0.1s steps(2);
+}
+
+.admin__view-all:hover {
+  color: #FFD700;
+}
+
+/* Recent Orders */
+.admin__recent-orders {
+  padding: 20px !important;
+}
+
+.admin__orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin__order-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin__order-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin__order-id {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #FFD700;
+}
+
+.admin__order-customer {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #B8B8D0;
+}
+
+.admin__order-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin__order-total {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #00A86B;
+}
+
+.admin__empty-list {
+  text-align: center;
+  padding: 32px;
+}
+
+.admin__empty-list span {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.admin__empty-list p {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+}
+
+/* Quick Actions */
+.admin__quick-actions {
+  padding: 20px !important;
+}
+
+.admin__quick-actions .admin__card-title {
+  margin-bottom: 16px;
+}
+
+.admin__actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.admin__action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background-color: #16213e;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  color: #B8B8D0;
+  text-decoration: none;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  text-align: center;
+  transition: all 0.1s steps(2);
+}
+
+.admin__action-btn:hover {
+  border-color: #FFD700;
+  color: #FFD700;
+  background-color: rgba(255, 215, 0, 0.1);
+}
+
+.admin__action-emoji {
+  font-size: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .admin__stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin__content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin {
+    flex-direction: column;
+  }
+
+  .admin__sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    border-right: none;
+    border-bottom: 4px solid #FF6B35;
+  }
+
+  .admin__nav {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 8px;
+    gap: 4px;
+  }
+
+  .admin__nav-link {
+    flex: 1;
+    min-width: 100px;
+    justify-content: center;
+    padding: 10px;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+  }
+
+  .admin__nav-link:hover,
+  .admin__nav-link--active {
+    border-left: none;
+    border-bottom-color: currentColor;
+  }
+
+  .admin__stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin__sidebar-footer {
+    display: none;
+  }
+}

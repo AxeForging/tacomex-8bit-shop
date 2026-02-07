@@ -1,0 +1,332 @@
+.cart-sidebar__overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  animation: overlay-fade 0.2s ease-out;
+}
+
+@keyframes overlay-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cart-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  max-width: 400px;
+  height: 100vh;
+  background-color: #16213e;
+  border-left: 4px solid #FF6B35;
+  display: flex;
+  flex-direction: column;
+  z-index: 201;
+  animation: sidebar-slide 0.3s steps(6);
+}
+
+@keyframes sidebar-slide {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* Header */
+.cart-sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 4px solid rgba(255, 255, 255, 0.1);
+  background-color: #1f4068;
+}
+
+.cart-sidebar__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.75rem;
+  color: #FFD700;
+}
+
+.cart-sidebar__close {
+  background: transparent;
+  border: 2px solid #DC143C;
+  color: #DC143C;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.1s steps(2);
+}
+
+.cart-sidebar__close:hover {
+  background-color: #DC143C;
+  color: #FFFFFF;
+}
+
+/* Empty state */
+.cart-sidebar__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+}
+
+.cart-sidebar__empty-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  animation: empty-bounce 2s ease-in-out infinite;
+}
+
+@keyframes empty-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+
+.cart-sidebar__empty-text {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.75rem;
+  color: #FFD700;
+  margin-bottom: 8px;
+}
+
+.cart-sidebar__empty-subtext {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+  margin-bottom: 24px;
+}
+
+/* Items list */
+.cart-sidebar__items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.cart-sidebar__item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background-color: #1f4068;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 12px;
+}
+
+.cart-sidebar__item-image {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #16213e;
+  font-size: 1.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.cart-sidebar__item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cart-sidebar__item-name {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #FFFFFF;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cart-sidebar__item-options {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #B8B8D0;
+  margin-bottom: 2px;
+}
+
+.cart-sidebar__item-instructions {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.35rem;
+  color: #9B59B6;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+.cart-sidebar__item-price {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #00A86B;
+}
+
+.cart-sidebar__item-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.cart-sidebar__quantity {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cart-sidebar__quantity-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FF6B35;
+  border: none;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.1s steps(2);
+}
+
+.cart-sidebar__quantity-btn:hover {
+  background-color: #FFD700;
+  color: #1a1a2e;
+}
+
+.cart-sidebar__quantity-value {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #FFFFFF;
+  min-width: 24px;
+  text-align: center;
+}
+
+.cart-sidebar__remove-btn {
+  background: transparent;
+  border: none;
+  color: #DC143C;
+  cursor: pointer;
+  padding: 4px;
+  transition: all 0.1s steps(2);
+}
+
+.cart-sidebar__remove-btn:hover {
+  color: #FF6B6B;
+  transform: scale(1.2);
+}
+
+/* Promo code */
+.cart-sidebar__promo {
+  padding: 16px;
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+  background-color: #1f4068;
+}
+
+.cart-sidebar__promo-input {
+  display: flex;
+  gap: 8px;
+}
+
+.cart-sidebar__promo-input input {
+  flex: 1;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  padding: 8px 12px;
+  background-color: #16213e;
+  border: 2px solid #B8B8D0;
+  color: #FFFFFF;
+}
+
+.cart-sidebar__promo-input input:focus {
+  outline: none;
+  border-color: #FFD700;
+}
+
+.cart-sidebar__promo-error {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #DC143C;
+  margin-top: 8px;
+}
+
+.cart-sidebar__promo-applied {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #00A86B;
+}
+
+.cart-sidebar__promo-applied button {
+  background: transparent;
+  border: none;
+  color: #DC143C;
+  cursor: pointer;
+  padding: 2px;
+}
+
+/* Summary */
+.cart-sidebar__summary {
+  padding: 16px;
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+  background-color: #0f3460;
+}
+
+.cart-sidebar__summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+  margin-bottom: 8px;
+}
+
+.cart-sidebar__summary-row--discount {
+  color: #00A86B;
+}
+
+.cart-sidebar__summary-row--total {
+  font-size: 0.625rem;
+  color: #FFD700;
+  padding-top: 8px;
+  border-top: 2px dashed rgba(255, 255, 255, 0.2);
+  margin-top: 8px;
+}
+
+/* Footer */
+.cart-sidebar__footer {
+  padding: 16px;
+  border-top: 4px solid #FF6B35;
+  background-color: #1f4068;
+}
+
+.cart-sidebar__clear {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  background: transparent;
+  border: none;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.1s steps(2);
+}
+
+.cart-sidebar__clear:hover {
+  color: #DC143C;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .cart-sidebar {
+    max-width: 100%;
+  }
+}

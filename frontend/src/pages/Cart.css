@@ -1,0 +1,427 @@
+.cart {
+  min-height: 100vh;
+  background-color: #1a1a2e;
+  padding: 24px 16px;
+}
+
+.cart--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Empty state */
+.cart__empty-content {
+  text-align: center;
+  max-width: 400px;
+}
+
+.cart__empty-icon {
+  font-size: 6rem;
+  display: block;
+  margin-bottom: 24px;
+  animation: cart-bounce 2s ease-in-out infinite;
+}
+
+@keyframes cart-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.cart__empty-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.25rem;
+  color: #FFD700;
+  margin-bottom: 16px;
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+.cart__empty-text {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+  line-height: 2;
+  margin-bottom: 24px;
+}
+
+/* Header */
+.cart__header {
+  max-width: 1200px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.cart__back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: #B8B8D0;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  cursor: pointer;
+  transition: color 0.1s steps(2);
+}
+
+.cart__back:hover {
+  color: #FFD700;
+}
+
+.cart__title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1rem;
+  color: #FFD700;
+}
+
+.cart__item-count {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+}
+
+/* Container */
+.cart__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 32px;
+}
+
+/* Items section */
+.cart__items-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cart__items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cart__item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background-color: #1f4068;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.1s steps(2);
+}
+
+.cart__item:hover {
+  border-color: #FFD700;
+}
+
+.cart__item-image {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #16213e;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.cart__item-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.cart__item-name {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #FFFFFF;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 8px;
+  transition: color 0.1s steps(2);
+}
+
+.cart__item-name:hover {
+  color: #FFD700;
+}
+
+.cart__item-options {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  color: #00A86B;
+  margin-bottom: 4px;
+}
+
+.cart__item-instructions {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #9B59B6;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+.cart__item-price-unit {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #B8B8D0;
+}
+
+.cart__item-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.cart__item-quantity {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #16213e;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 4px;
+}
+
+.cart__quantity-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FF6B35;
+  border: none;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.1s steps(2);
+}
+
+.cart__quantity-btn:hover {
+  background-color: #FFD700;
+  color: #1a1a2e;
+}
+
+.cart__quantity-value {
+  min-width: 32px;
+  text-align: center;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #FFFFFF;
+}
+
+.cart__item-total {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.875rem;
+  color: #00A86B;
+  min-width: 80px;
+  text-align: right;
+}
+
+.cart__remove-btn {
+  background: transparent;
+  border: 2px solid #DC143C;
+  color: #DC143C;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.1s steps(2);
+}
+
+.cart__remove-btn:hover {
+  background-color: #DC143C;
+  color: #FFFFFF;
+}
+
+.cart__clear {
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #DC143C;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 8px 0;
+  transition: color 0.1s steps(2);
+}
+
+.cart__clear:hover {
+  color: #FF6B6B;
+}
+
+/* Summary section */
+.cart__summary-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cart__summary {
+  background-color: #1f4068;
+  border: 4px solid #FFFFFF;
+  padding: 24px;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.5);
+}
+
+.cart__summary-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.875rem;
+  color: #FFD700;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.cart__summary-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.2);
+}
+
+.cart__summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+}
+
+.cart__summary-row--discount {
+  color: #00A86B;
+}
+
+.cart__free-delivery {
+  color: #00A86B;
+  animation: free-pulse 1s ease-in-out infinite;
+}
+
+@keyframes free-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.cart__summary-total {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.875rem;
+  color: #FFD700;
+  margin-bottom: 24px;
+}
+
+.cart__free-delivery-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: rgba(255, 215, 0, 0.1);
+  border: 2px solid #FFD700;
+  margin-bottom: 16px;
+}
+
+.cart__free-delivery-icon {
+  font-size: 1.5rem;
+}
+
+.cart__free-delivery-info p {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #FFD700;
+  line-height: 1.6;
+}
+
+.cart__continue-link {
+  display: block;
+  text-align: center;
+  margin-top: 16px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #B8B8D0;
+  text-decoration: none;
+  transition: color 0.1s steps(2);
+}
+
+.cart__continue-link:hover {
+  color: #FFD700;
+}
+
+/* Promo info */
+.cart__promo-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: #16213e;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.cart__promo-icon {
+  font-size: 1.5rem;
+}
+
+.cart__promo-text {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  color: #B8B8D0;
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .cart__container {
+    grid-template-columns: 1fr;
+  }
+
+  .cart__summary-section {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #1a1a2e;
+    padding: 16px;
+    border-top: 4px solid #FF6B35;
+    z-index: 50;
+  }
+
+  .cart__summary {
+    box-shadow: none;
+  }
+
+  .cart__items-section {
+    padding-bottom: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cart__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cart__item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cart__item-image {
+    width: 100%;
+    height: 100px;
+  }
+
+  .cart__item-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

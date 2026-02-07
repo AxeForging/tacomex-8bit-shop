@@ -1,0 +1,225 @@
+/* Admin Orders specific styles */
+.admin-orders__filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.admin-orders__search {
+  flex: 1;
+  min-width: 200px;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background-color: #16213e;
+  border: 3px solid #B8B8D0;
+}
+
+.admin-orders__search:focus-within {
+  border-color: #FFD700;
+}
+
+.admin-orders__search svg {
+  color: #6B6B80;
+  flex-shrink: 0;
+}
+
+.admin-orders__search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #FFFFFF;
+}
+
+.admin-orders__search input:focus {
+  outline: none;
+}
+
+.admin-orders__search input::placeholder {
+  color: #6B6B80;
+}
+
+.admin-orders__status-filter {
+  padding: 10px 14px;
+  background-color: #16213e;
+  border: 3px solid #B8B8D0;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.admin-orders__status-filter:focus {
+  outline: none;
+  border-color: #FFD700;
+}
+
+/* Orders list */
+.admin-orders__list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-orders__card {
+  padding: 0 !important;
+}
+
+.admin-orders__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-orders__order-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-orders__order-id {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #FFD700;
+}
+
+.admin-orders__order-date {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #B8B8D0;
+}
+
+.admin-orders__card-body {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.admin-orders__customer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-orders__customer-name {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #FFFFFF;
+}
+
+.admin-orders__customer-email {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #B8B8D0;
+}
+
+.admin-orders__items {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  color: #B8B8D0;
+  line-height: 1.8;
+}
+
+.admin-orders__total {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1rem;
+  color: #00A86B;
+}
+
+.admin-orders__card-footer {
+  padding: 12px 16px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-orders__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-orders__view-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  color: #B8B8D0;
+  text-decoration: none;
+  transition: color 0.1s steps(2);
+}
+
+.admin-orders__view-link:hover {
+  color: #FFD700;
+}
+
+.admin-orders__status-update {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-orders__status-update select {
+  padding: 8px 12px;
+  background-color: #16213e;
+  border: 2px solid #B8B8D0;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  color: #FFFFFF;
+}
+
+.admin-orders__status-update select:focus {
+  outline: none;
+  border-color: #FFD700;
+}
+
+/* Empty state */
+.admin-orders__empty {
+  text-align: center;
+  padding: 64px;
+}
+
+.admin-orders__empty span {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.admin-orders__empty p {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #B8B8D0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-orders__card-body {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .admin-orders__total {
+    font-size: 0.875rem;
+  }
+
+  .admin-orders__status-update {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-orders__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
