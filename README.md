@@ -133,8 +133,10 @@ tacomex-8bit-shop/
 ├── scripts/
 │   └── init-db.sql        # PostgreSQL schema init
 ├── .github/
+│   ├── actions/
+│   │   └── start-app/     # Composite action: spin up & wait
 │   └── workflows/
-│       └── start-app.yml  # Reusable CI workflow
+│       └── ci.yml         # CI pipeline with Playwright
 ├── docker-compose.yaml
 └── README.md
 ```
@@ -166,17 +168,26 @@ docker compose down -v
 
 ## GitHub Actions
 
-This repo includes a reusable workflow at `.github/workflows/start-app.yml` that any workflow can call to spin up the full stack and wait for it to be healthy:
+This repo includes a **composite action** at `.github/actions/start-app/` that starts the full stack and waits for it to be healthy — as a step inside your job, so subsequent steps (like Playwright) share the same running containers.
 
 ```yaml
 jobs:
-  my-job:
-    uses: ./.github/workflows/start-app.yml
-    with:
-      health-timeout: 120
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start app
+        uses: machado144/tacomex-8bit-shop/.github/actions/start-app@main
+        with:
+          health-timeout: "120"
+
+      # App is running — add your test steps here
+      - run: npx playwright test
+        working-directory: frontend
 ```
 
-See the workflow file for all available inputs.
+**Inputs:** `health-timeout` (default `120`), `health-url` (default `http://localhost:3001/health`), `docker-compose-file` (default `docker-compose.yaml`).
 
 ## License
 

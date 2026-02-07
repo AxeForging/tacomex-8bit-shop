@@ -1,0 +1,45 @@
+name: "Start TacoMex App"
+description: "Starts the full stack via Docker Compose and waits for the health check to pass. Use as a step so subsequent steps (e.g. Playwright) share the same running containers."
+
+inputs:
+  health-timeout:
+    description: "Max seconds to wait for the app to become healthy"
+    required: false
+    default: "120"
+  health-url:
+    description: "Health endpoint URL to poll"
+    required: false
+    default: "http://localhost:3001/health"
+  docker-compose-file:
+    description: "Path to docker-compose file"
+    required: false
+    default: "docker-compose.yaml"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Start services
+      shell: bash
+      run: docker compose -f ${{ inputs.docker-compose-file }} up --build -d
+
+    - name: Wait for app to be ready
+      shell: bash
+      run: |
+        echo "Waiting for ${{ inputs.health-url }} (timeout: ${{ inputs.health-timeout }}s)..."
+        elapsed=0
+        until curl -sf "${{ inputs.health-url }}" > /dev/null 2>&1; do
+          if [ "$elapsed" -ge "${{ inputs.health-timeout }}" ]; then
+            echo "::error::Timed out after ${elapsed}s waiting for health check"
+            echo "--- Container status ---"
+            docker compose -f ${{ inputs.docker-compose-file }} ps
+            echo "--- Backend logs ---"
+            docker compose -f ${{ inputs.docker-compose-file }} logs backend --tail=80
+            echo "--- Postgres logs ---"
+            docker compose -f ${{ inputs.docker-compose-file }} logs postgres --tail=30
+            exit 1
+          fi
+          sleep 2
+          elapsed=$((elapsed + 2))
+        done
+        echo "App is healthy after ${elapsed}s"
+        curl -sf "${{ inputs.health-url }}" | python3 -m json.tool
