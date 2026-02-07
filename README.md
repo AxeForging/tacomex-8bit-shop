@@ -194,6 +194,27 @@ docker compose down -v
 
 This repo includes a **composite action** at `.github/actions/start-app/` that starts the full stack and waits for it to be healthy — as a step inside your job, so subsequent steps (like Playwright) share the same running containers.
 
+The action works from **any repo** — it automatically clones the TacoMex source, builds, and starts everything. Your workspace stays untouched for your own code and tests.
+
+### From another repo (default)
+
+```yaml
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4  # your own repo
+
+      - name: Start TacoMex app
+        uses: AxeForging/tacomex-8bit-shop/.github/actions/start-app@main
+
+      # TacoMex is running on localhost:3001 (API) and localhost:5173 (frontend)
+      # Your workspace still has your own repo checked out
+      - run: npm test
+```
+
+### Inside the TacoMex repo
+
 ```yaml
 jobs:
   e2e:
@@ -204,10 +225,9 @@ jobs:
       - name: Start app
         uses: AxeForging/tacomex-8bit-shop/.github/actions/start-app@main
         with:
-          health-timeout: "120"
+          checkout: "false"
           install-frontend-deps: "true"
 
-      # App is running — add your test steps here
       - run: npx playwright install --with-deps && npx playwright test
         working-directory: frontend
 ```
@@ -219,7 +239,8 @@ jobs:
 | `health-timeout` | `180` | Max seconds to wait for the health check |
 | `health-url` | `http://localhost:3001/health` | Health endpoint URL to poll |
 | `docker-compose-file` | `docker-compose.yaml` | Path to docker-compose file |
-| `working-directory` | `.` | Directory where the project was checked out |
+| `checkout` | `true` | Clone the TacoMex repo automatically (set to `false` when running inside the TacoMex repo) |
+| `app-ref` | `main` | Git ref (branch/tag/sha) of the TacoMex repo to checkout |
 | `install-frontend-deps` | `false` | Install frontend deps on the host and restart the container (needed for Playwright) |
 | `frontend-dir` | `frontend` | Relative path to frontend directory |
 

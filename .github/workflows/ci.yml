@@ -17,6 +17,7 @@ jobs:
         uses: AxeForging/tacomex-8bit-shop/.github/actions/start-app@main
         with:
           health-timeout: "120"
+          checkout: "false"
           install-frontend-deps: "true"
 
       - name: Setup Node
