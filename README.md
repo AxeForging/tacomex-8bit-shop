@@ -188,6 +188,9 @@ docker compose down
 
 # Stop and remove volumes
 docker compose down -v
+
+# Reset database and reseed (drops volumes, rebuilds, and reseeds automatically)
+docker compose down -v && docker compose up --build
 ```
 
 ## GitHub Actions
