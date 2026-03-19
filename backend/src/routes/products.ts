@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { eq, and, or, gte, lte, ilike, sql, asc, desc } from 'drizzle-orm';
-import { db, products, categories, productOptions } from '../db';
-import { NotFoundError, ValidationError } from '../middleware/errorHandler';
-import { authenticateAdmin } from '../middleware/auth';
+import { db, products, categories, productOptions } from '@/db';
+import { NotFoundError, ValidationError } from '@/middleware/errorHandler';
+import { authenticateAdmin } from '@/middleware/auth';
 
 interface ProductsQuery {
   category?: string;
@@ -22,10 +22,107 @@ interface ProductParams {
   id: string;
 }
 
+const ProductOptionSchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'integer', example: 1 },
+    product_id: { type: 'integer', example: 1 },
+    name: { type: 'string', example: 'Super Size' },
+    option_type: { type: 'string', enum: ['size', 'extra', 'sauce', 'side'], example: 'size' },
+    price_modifier: { type: 'number', example: 1.5 },
+    is_default: { type: 'boolean', example: false },
+  },
+};
+
+const ProductSchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'integer', example: 1 },
+    name: { type: 'string', example: 'Pixel Carne Asada Taco' },
+    slug: { type: 'string', example: 'pixel-carne-asada-taco' },
+    description: { type: 'string', example: 'Grilled steak with cilantro, onions, and our secret 8-bit salsa verde' },
+    price: { type: 'number', example: 4.49 },
+    image_url: { type: 'string', nullable: true },
+    category_id: { type: 'integer', example: 1 },
+    is_available: { type: 'boolean', example: true },
+    is_featured: { type: 'boolean', example: true },
+    spice_level: { type: 'integer', minimum: 0, maximum: 5, example: 2 },
+    prep_time_minutes: { type: 'integer', example: 10 },
+    calories: { type: 'integer', nullable: true, example: 280 },
+    created_at: { type: 'string', format: 'date-time' },
+    updated_at: { type: 'string', format: 'date-time' },
+    category_name: { type: 'string', example: 'Tacos' },
+    category_slug: { type: 'string', example: 'tacos' },
+    options: { type: 'array', items: ProductOptionSchema },
+  },
+};
+
+const PaginationSchema = {
+  type: 'object',
+  properties: {
+    page: { type: 'integer', example: 1 },
+    limit: { type: 'integer', example: 20 },
+    total: { type: 'integer', example: 42 },
+    totalPages: { type: 'integer', example: 3 },
+  },
+};
+
+const ErrorSchema = {
+  type: 'object',
+  properties: { error: { type: 'string' } },
+};
+
+const CategorySchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'integer', example: 1 },
+    name: { type: 'string', example: 'Tacos' },
+    slug: { type: 'string', example: 'tacos' },
+    description: { type: 'string' },
+    image_url: { type: 'string', nullable: true },
+    display_order: { type: 'integer', example: 1 },
+    created_at: { type: 'string', format: 'date-time' },
+    product_count: { type: 'integer', example: 6 },
+  },
+};
+
 export default async function productsRoutes(fastify: FastifyInstance): Promise<void> {
   // GET /products - List all products with filtering
   fastify.get<{ Querystring: ProductsQuery }>(
     '/',
+    {
+      schema: {
+        tags: ['Products'],
+        summary: 'List products',
+        description: 'Get paginated products with optional filters. Supports search, category, price range, spice level, and sorting.',
+        querystring: {
+          type: 'object',
+          properties: {
+            category: { type: 'string', description: 'Filter by category ID or slug (e.g. `1` or `tacos`)' },
+            featured: { type: 'string', enum: ['true'], description: 'Return only featured products' },
+            available: { type: 'string', enum: ['true', 'false'], description: 'Filter by availability' },
+            minPrice: { type: 'string', description: 'Minimum price (e.g. `3.99`)' },
+            maxPrice: { type: 'string', description: 'Maximum price (e.g. `12.00`)' },
+            spiceLevel: { type: 'string', description: 'Filter by exact spice level 0-5' },
+            search: { type: 'string', description: 'Search by name or description' },
+            sortBy: { type: 'string', enum: ['name', 'price', 'created_at', 'spice_level', 'prep_time_minutes'], description: 'Sort field (default: name)' },
+            sortOrder: { type: 'string', enum: ['asc', 'desc'], description: 'Sort direction (default: asc)' },
+            page: { type: 'string', description: 'Page number (default: 1)', default: '1' },
+            limit: { type: 'string', description: 'Results per page, max 100 (default: 20)', default: '20' },
+          },
+        },
+        response: {
+          200: {
+            description: 'Paginated product list',
+            type: 'object',
+            properties: {
+              products: { type: 'array', items: ProductSchema },
+              pagination: PaginationSchema,
+            },
+          },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Querystring: ProductsQuery }>, reply: FastifyReply) => {
       const {
         category,
@@ -207,6 +304,22 @@ export default async function productsRoutes(fastify: FastifyInstance): Promise<
   // GET /products/featured - Get featured products
   fastify.get(
     '/featured',
+    {
+      schema: {
+        tags: ['Products'],
+        summary: 'Featured products',
+        description: 'Returns up to 10 featured and available products.',
+        response: {
+          200: {
+            description: 'Featured product list',
+            type: 'object',
+            properties: {
+              products: { type: 'array', items: ProductSchema },
+            },
+          },
+        },
+      },
+    },
     async (_request: FastifyRequest, reply: FastifyReply) => {
       const result = await db
         .select({
@@ -259,6 +372,27 @@ export default async function productsRoutes(fastify: FastifyInstance): Promise<
   // GET /products/:id - Get single product
   fastify.get<{ Params: ProductParams }>(
     '/:id',
+    {
+      schema: {
+        tags: ['Products'],
+        summary: 'Get product by ID',
+        description: 'Returns full product detail including options. Accepts numeric ID or slug.',
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'Product ID or slug (e.g. `1` or `pixel-carne-asada-taco`)' },
+          },
+        },
+        response: {
+          200: {
+            description: 'Product detail with options',
+            type: 'object',
+            properties: { product: ProductSchema },
+          },
+          404: { description: 'Product not found', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Params: ProductParams }>, reply: FastifyReply) => {
       const { id } = request.params;
 
@@ -335,7 +469,40 @@ export default async function productsRoutes(fastify: FastifyInstance): Promise<
   // POST /products - Create product (admin only)
   fastify.post(
     '/',
-    { preHandler: [authenticateAdmin] },
+    {
+      preHandler: [authenticateAdmin],
+      schema: {
+        tags: ['Products'],
+        summary: 'Create product (admin)',
+        description: 'Creates a new product. Admin only.',
+        security: [{ bearerAuth: [] }],
+        body: {
+          type: 'object',
+          required: ['name', 'price'],
+          properties: {
+            name: { type: 'string', example: 'New Taco' },
+            description: { type: 'string', example: 'A brand-new taco' },
+            price: { type: 'number', example: 5.99 },
+            categoryId: { type: 'string', description: 'Category ID', example: '1' },
+            spiceLevel: { type: 'integer', minimum: 0, maximum: 5, example: 2 },
+            isAvailable: { type: 'boolean', example: true },
+            isFeatured: { type: 'boolean', example: false },
+          },
+        },
+        response: {
+          201: {
+            description: 'Product created',
+            type: 'object',
+            properties: {
+              message: { type: 'string', example: 'Product created' },
+              product: ProductSchema,
+            },
+          },
+          401: { description: 'Unauthorized', ...ErrorSchema },
+          403: { description: 'Admin access required', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Body: Record<string, unknown> }>, reply: FastifyReply) => {
       const { name, description, price, categoryId, spiceLevel, isAvailable, isFeatured } = request.body as {
         name: string; description?: string; price: number; categoryId?: string;
@@ -366,7 +533,46 @@ export default async function productsRoutes(fastify: FastifyInstance): Promise<
   // PATCH /products/:id - Update product (admin only)
   fastify.patch<{ Params: ProductParams }>(
     '/:id',
-    { preHandler: [authenticateAdmin] },
+    {
+      preHandler: [authenticateAdmin],
+      schema: {
+        tags: ['Products'],
+        summary: 'Update product (admin)',
+        description: 'Updates an existing product. Admin only. Only provided fields are updated.',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'Product ID', example: '1' },
+          },
+        },
+        body: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', example: 'Updated Taco Name' },
+            description: { type: 'string' },
+            price: { type: 'number', example: 6.49 },
+            categoryId: { type: 'string', example: '2' },
+            spiceLevel: { type: 'integer', minimum: 0, maximum: 5 },
+            isAvailable: { type: 'boolean' },
+            isFeatured: { type: 'boolean' },
+          },
+        },
+        response: {
+          200: {
+            description: 'Product updated',
+            type: 'object',
+            properties: {
+              message: { type: 'string', example: 'Product updated' },
+              product: ProductSchema,
+            },
+          },
+          401: { description: 'Unauthorized', ...ErrorSchema },
+          403: { description: 'Admin access required', ...ErrorSchema },
+          404: { description: 'Product not found', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Params: ProductParams; Body: Record<string, unknown> }>, reply: FastifyReply) => {
       const { id } = request.params;
       const body = request.body as Record<string, unknown>;
@@ -395,7 +601,31 @@ export default async function productsRoutes(fastify: FastifyInstance): Promise<
   // DELETE /products/:id - Delete product (admin only)
   fastify.delete<{ Params: ProductParams }>(
     '/:id',
-    { preHandler: [authenticateAdmin] },
+    {
+      preHandler: [authenticateAdmin],
+      schema: {
+        tags: ['Products'],
+        summary: 'Delete product (admin)',
+        description: 'Permanently deletes a product and its options. Admin only.',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'Product ID', example: '1' },
+          },
+        },
+        response: {
+          200: {
+            description: 'Product deleted',
+            type: 'object',
+            properties: { message: { type: 'string', example: 'Product deleted' } },
+          },
+          401: { description: 'Unauthorized', ...ErrorSchema },
+          403: { description: 'Admin access required', ...ErrorSchema },
+          404: { description: 'Product not found', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Params: ProductParams }>, reply: FastifyReply) => {
       const { id } = request.params;
 
@@ -412,6 +642,22 @@ export default async function productsRoutes(fastify: FastifyInstance): Promise<
   // GET /products/categories/list - List all categories (from products route)
   fastify.get(
     '/categories/list',
+    {
+      schema: {
+        tags: ['Products'],
+        summary: 'List categories with product counts',
+        description: 'Returns all categories with available product counts. Alternative to GET /api/categories.',
+        response: {
+          200: {
+            description: 'Category list',
+            type: 'object',
+            properties: {
+              categories: { type: 'array', items: CategorySchema },
+            },
+          },
+        },
+      },
+    },
     async (_request: FastifyRequest, reply: FastifyReply) => {
       const result = await db
         .select({

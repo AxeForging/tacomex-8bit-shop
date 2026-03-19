@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
-import { JwtPayload } from '../types';
+import { JwtPayload } from '@/types';
+import { cache } from '@/config/redis';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tacomex-8bit-secret-key-change-in-production';
 
@@ -18,7 +19,7 @@ export function generateToken(fastify: FastifyInstance, payload: JwtPayload): st
   return fastify.jwt.sign(payload);
 }
 
-// Authentication hook - verifies JWT token
+// Authentication hook - verifies JWT token and checks blacklist
 export async function authenticate(
   request: FastifyRequest,
   reply: FastifyReply
@@ -26,7 +27,16 @@ export async function authenticate(
   try {
     await request.jwtVerify();
   } catch (err) {
-    reply.status(401).send({ error: 'Invalid or expired token' });
+    return reply.status(401).send({ error: 'Invalid or expired token' });
+  }
+
+  // Check if token has been blacklisted (logged out)
+  const token = request.headers.authorization?.replace(/^Bearer\s+/i, '');
+  if (token) {
+    const blacklisted = await cache.isTokenBlacklisted(token);
+    if (blacklisted) {
+      return reply.status(401).send({ error: 'Token has been revoked. Please log in again.' });
+    }
   }
 }
 
@@ -66,6 +76,14 @@ export async function authenticateAdmin(
     await request.jwtVerify();
   } catch (err) {
     return reply.status(401).send({ error: 'Invalid or expired token' });
+  }
+
+  const token = request.headers.authorization?.replace(/^Bearer\s+/i, '');
+  if (token) {
+    const blacklisted = await cache.isTokenBlacklisted(token);
+    if (blacklisted) {
+      return reply.status(401).send({ error: 'Token has been revoked. Please log in again.' });
+    }
   }
 
   if (request.user?.role !== 'admin') {

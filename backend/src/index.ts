@@ -4,25 +4,37 @@ import helmet from '@fastify/helmet';
 import jwt from '@fastify/jwt';
 import rateLimit from '@fastify/rate-limit';
 
-import { getJwtConfig } from './middleware/auth';
-import { errorHandler, notFoundHandler } from './middleware/errorHandler';
-import { redis } from './config/redis';
-import { testConnection } from './db';
-import { registerSwagger } from './plugins/swagger';
+import { getJwtConfig } from '@/middleware/auth';
+import { errorHandler, notFoundHandler } from '@/middleware/errorHandler';
+import { redis } from '@/config/redis';
+import { testConnection } from '@/db';
+import { registerSwagger } from '@/plugins/swagger';
 
 // Import routes
-import authRoutes from './routes/auth';
-import productsRoutes from './routes/products';
-import categoriesRoutes from './routes/categories';
-import ordersRoutes from './routes/orders';
-import usersRoutes from './routes/users';
-import promotionsRoutes from './routes/promotions';
+import authRoutes from '@/routes/auth';
+import productsRoutes from '@/routes/products';
+import categoriesRoutes from '@/routes/categories';
+import ordersRoutes from '@/routes/orders';
+import usersRoutes from '@/routes/users';
+import promotionsRoutes from '@/routes/promotions';
+import cartRoutes from '@/routes/cart';
 
 const PORT = parseInt(process.env.PORT || '3001');
 const HOST = process.env.HOST || '0.0.0.0';
 
+// Rate limit env vars — set high in dev/testing, restrictive in production.
+// Override via environment variables to simulate throttling at any time.
+const RATE_LIMIT_GLOBAL = parseInt(process.env.RATE_LIMIT_GLOBAL || (process.env.NODE_ENV === 'production' ? '100' : '10000'));
+const RATE_LIMIT_AUTH   = parseInt(process.env.RATE_LIMIT_AUTH   || (process.env.NODE_ENV === 'production' ? '5'   : '1000'));
+const RATE_LIMIT_ORDERS = parseInt(process.env.RATE_LIMIT_ORDERS || (process.env.NODE_ENV === 'production' ? '10'  : '1000'));
+
 async function buildServer(): Promise<FastifyInstance> {
   const fastify = Fastify({
+    ajv: {
+      customOptions: {
+        strict: false, // allow OpenAPI keywords like `example`, `description` in schemas
+      },
+    },
     logger: process.env.NODE_ENV !== 'production' ? {
       transport: {
         target: 'pino-pretty',
@@ -56,11 +68,12 @@ async function buildServer(): Promise<FastifyInstance> {
 
   await fastify.register(jwt, getJwtConfig());
 
-  // Rate limiting with Redis (high limits for dev/testing, lower in production)
-  const isDev = process.env.NODE_ENV !== 'production';
+  // Rate limiting with Redis as distributed store.
+  // Defaults are permissive in dev so testing is easy.
+  // Set RATE_LIMIT_GLOBAL / RATE_LIMIT_AUTH / RATE_LIMIT_ORDERS env vars to simulate throttling.
   await fastify.register(rateLimit, {
     global: true,
-    max: isDev ? 10000 : 100,
+    max: RATE_LIMIT_GLOBAL,
     timeWindow: '15 minutes',
     redis: redis,
     keyGenerator: (request) => request.ip,
@@ -71,7 +84,27 @@ async function buildServer(): Promise<FastifyInstance> {
   });
 
   // Health check endpoint
-  fastify.get('/health', async (_request, reply) => {
+  fastify.get('/health', {
+    schema: {
+      tags: ['Health'],
+      summary: 'Health check',
+      description: 'Returns service status including database and Redis connectivity.',
+      response: {
+        200: {
+          description: 'Service is healthy',
+          type: 'object',
+          properties: {
+            status: { type: 'string', example: 'ok' },
+            timestamp: { type: 'string', format: 'date-time' },
+            service: { type: 'string', example: 'TacoMex 8-bit Shop API' },
+            version: { type: 'string', example: '2.0.0' },
+            redis: { type: 'string', enum: ['connected', 'disconnected', 'error'], example: 'connected' },
+            database: { type: 'string', enum: ['connected', 'disconnected', 'error'], example: 'connected' },
+          },
+        },
+      },
+    },
+  }, async (_request, reply) => {
     let redisStatus = 'disconnected';
     let dbStatus = 'disconnected';
 
@@ -100,7 +133,24 @@ async function buildServer(): Promise<FastifyInstance> {
   });
 
   // Root endpoint
-  fastify.get('/', async (_request, reply) => {
+  fastify.get('/', {
+    schema: {
+      tags: ['Health'],
+      summary: 'API info',
+      description: 'Returns welcome message and available endpoint listing.',
+      response: {
+        200: {
+          description: 'API info',
+          type: 'object',
+          properties: {
+            message: { type: 'string', example: 'Welcome to TacoMex 8-bit Shop API' },
+            version: { type: 'string', example: '2.0.0' },
+            endpoints: { type: 'object' },
+          },
+        },
+      },
+    },
+  }, async (_request, reply) => {
     return reply.send({
       message: 'Welcome to TacoMex 8-bit Shop API',
       version: '2.0.0',
@@ -110,6 +160,7 @@ async function buildServer(): Promise<FastifyInstance> {
         products: '/api/products',
         categories: '/api/categories',
         orders: '/api/orders',
+        cart: '/api/cart',
         users: '/api/users',
         promotions: '/api/promotions',
       },
@@ -120,9 +171,8 @@ async function buildServer(): Promise<FastifyInstance> {
   await fastify.register(async (api) => {
     // Auth routes with stricter rate limiting
     await api.register(async (authApi) => {
-      // Apply stricter rate limit for login/register (relaxed in dev)
       await authApi.register(rateLimit, {
-        max: isDev ? 1000 : 5,
+        max: RATE_LIMIT_AUTH,
         timeWindow: '15 minutes',
         redis: redis,
         keyGenerator: (request) => request.ip,
@@ -143,7 +193,7 @@ async function buildServer(): Promise<FastifyInstance> {
     // Orders routes with rate limiting
     await api.register(async (ordersApi) => {
       await ordersApi.register(rateLimit, {
-        max: isDev ? 1000 : 10,
+        max: RATE_LIMIT_ORDERS,
         timeWindow: '1 hour',
         redis: redis,
         keyGenerator: (request) => request.ip,
@@ -160,6 +210,9 @@ async function buildServer(): Promise<FastifyInstance> {
 
     // Promotions routes
     await api.register(promotionsRoutes, { prefix: '/promotions' });
+
+    // Cart routes (Redis-backed, per user)
+    await api.register(cartRoutes, { prefix: '/cart' });
   }, { prefix: '/api' });
 
   return fastify;

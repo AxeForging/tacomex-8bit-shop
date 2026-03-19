@@ -1,9 +1,9 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import bcrypt from 'bcryptjs';
 import { eq, and, or, ilike, sql, desc, inArray } from 'drizzle-orm';
-import { db, users, orders } from '../db';
-import { authenticate, authenticateAdmin } from '../middleware/auth';
-import { ValidationError, NotFoundError, ForbiddenError } from '../middleware/errorHandler';
+import { db, users, orders } from '@/db';
+import { authenticate, authenticateAdmin } from '@/middleware/auth';
+import { ValidationError, NotFoundError, ForbiddenError } from '@/middleware/errorHandler';
 
 interface UsersQuery {
   role?: string;
@@ -24,11 +24,90 @@ interface UpdateUserBody {
   password?: string;
 }
 
+const UserSchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'integer', example: 2 },
+    email: { type: 'string', example: 'customer@tacomex.com' },
+    name: { type: 'string', example: 'Demo Customer' },
+    role: { type: 'string', enum: ['customer', 'admin'], example: 'customer' },
+    avatar_url: { type: 'string', nullable: true, example: null },
+    created_at: { type: 'string', format: 'date-time' },
+    updated_at: { type: 'string', format: 'date-time' },
+  },
+};
+
+const UserListItemSchema = {
+  type: 'object',
+  properties: {
+    ...UserSchema.properties,
+    order_count: { type: 'integer', example: 3 },
+  },
+};
+
+const UserWithStatsSchema = {
+  type: 'object',
+  properties: {
+    ...UserSchema.properties,
+    stats: {
+      type: 'object',
+      properties: {
+        total_orders: { type: 'integer', example: 5 },
+        total_spent: { type: 'number', example: 72.45 },
+      },
+    },
+  },
+};
+
+const PaginationSchema = {
+  type: 'object',
+  properties: {
+    page: { type: 'integer', example: 1 },
+    limit: { type: 'integer', example: 20 },
+    total: { type: 'integer', example: 2 },
+    totalPages: { type: 'integer', example: 1 },
+  },
+};
+
+const ErrorSchema = {
+  type: 'object',
+  properties: { error: { type: 'string' } },
+};
+
 export default async function usersRoutes(fastify: FastifyInstance): Promise<void> {
   // GET /users - List all users (admin only)
   fastify.get<{ Querystring: UsersQuery }>(
     '/',
-    { preHandler: [authenticateAdmin] },
+    {
+      preHandler: [authenticateAdmin],
+      schema: {
+        tags: ['Users'],
+        summary: 'List users (admin)',
+        description: 'Admin only. Returns all users with order counts. Supports filtering by role or search term.',
+        security: [{ bearerAuth: [] }],
+        querystring: {
+          type: 'object',
+          properties: {
+            role: { type: 'string', enum: ['customer', 'admin'], description: 'Filter by role' },
+            search: { type: 'string', description: 'Search by name or email' },
+            page: { type: 'string', description: 'Page number (default: 1)', default: '1' },
+            limit: { type: 'string', description: 'Results per page, max 100 (default: 20)', default: '20' },
+          },
+        },
+        response: {
+          200: {
+            description: 'User list with order counts',
+            type: 'object',
+            properties: {
+              users: { type: 'array', items: UserListItemSchema },
+              pagination: PaginationSchema,
+            },
+          },
+          401: { description: 'Unauthorized', ...ErrorSchema },
+          403: { description: 'Admin access required', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Querystring: UsersQuery }>, reply: FastifyReply) => {
       const { role, search, page = '1', limit = '20' } = request.query;
 
@@ -125,7 +204,31 @@ export default async function usersRoutes(fastify: FastifyInstance): Promise<voi
   // GET /users/:id - Get single user (admin or self)
   fastify.get<{ Params: UserParams }>(
     '/:id',
-    { preHandler: [authenticate] },
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Users'],
+        summary: 'Get user profile',
+        description: 'Returns user profile with order stats. Admins can view any user. Customers can only view their own profile.',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'User ID', example: '2' },
+          },
+        },
+        response: {
+          200: {
+            description: 'User profile with order stats',
+            type: 'object',
+            properties: { user: UserWithStatsSchema },
+          },
+          401: { description: 'Unauthorized', ...ErrorSchema },
+          403: { description: 'Customers may only view their own profile', ...ErrorSchema },
+          404: { description: 'User not found', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Params: UserParams }>, reply: FastifyReply) => {
       const { id } = request.params;
       const isAdmin = request.user!.role === 'admin';
@@ -182,7 +285,45 @@ export default async function usersRoutes(fastify: FastifyInstance): Promise<voi
   // PATCH /users/:id - Update user (admin or self)
   fastify.patch<{ Params: UserParams; Body: UpdateUserBody }>(
     '/:id',
-    { preHandler: [authenticate] },
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Users'],
+        summary: 'Update user',
+        description: 'Updates a user profile. Admins can update any user including role. Customers can only update their own profile (name, email, avatar, password).',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'User ID', example: '2' },
+          },
+        },
+        body: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', example: 'Jane Doe' },
+            email: { type: 'string', format: 'email', example: 'jane@example.com' },
+            avatar_url: { type: 'string', nullable: true, example: 'https://example.com/avatar.png' },
+            role: { type: 'string', enum: ['customer', 'admin'], description: 'Admin only — change a user\'s role' },
+            password: { type: 'string', minLength: 6, example: 'newpassword123', description: 'Provide to update password' },
+          },
+        },
+        response: {
+          200: {
+            description: 'User updated successfully',
+            type: 'object',
+            properties: {
+              message: { type: 'string', example: 'User updated successfully' },
+              user: UserSchema,
+            },
+          },
+          400: { description: 'Validation error', ...ErrorSchema },
+          401: { description: 'Unauthorized', ...ErrorSchema },
+          403: { description: 'Customers may only update their own profile', ...ErrorSchema },
+          404: { description: 'User not found', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Params: UserParams; Body: UpdateUserBody }>, reply: FastifyReply) => {
       const { id } = request.params;
       const isAdmin = request.user!.role === 'admin';

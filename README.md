@@ -68,11 +68,12 @@ redis-cli -h localhost -p 6379
 
 ### Auth (`/api/auth`)
 
-| Method | Endpoint    | Auth | Description          |
-|--------|-------------|------|----------------------|
-| POST   | `/register` | -    | Register new user    |
-| POST   | `/login`    | -    | Login, returns JWT   |
-| GET    | `/me`       | JWT  | Get current profile  |
+| Method | Endpoint    | Auth | Description                          |
+|--------|-------------|------|--------------------------------------|
+| POST   | `/register` | -    | Register new user                    |
+| POST   | `/login`    | -    | Login, returns JWT                   |
+| GET    | `/me`       | JWT  | Get current profile                  |
+| POST   | `/logout`   | JWT  | Invalidate token (Redis blacklist)   |
 
 ### Products (`/api/products`)
 
@@ -115,6 +116,16 @@ redis-cli -h localhost -p 6379
 | POST   | `/validate` | -     | Validate promo code      |
 | POST   | `/`         | Admin | Create promotion         |
 | PATCH  | `/:id`      | Admin | Update promotion         |
+
+### Cart (`/api/cart`) — Redis-backed, per user, 24 h TTL
+
+| Method | Endpoint            | Auth | Description                       |
+|--------|---------------------|------|-----------------------------------|
+| GET    | `/`                 | JWT  | Get cart                          |
+| POST   | `/items`            | JWT  | Add / update item                 |
+| PATCH  | `/items/:productId` | JWT  | Update quantity (0 removes item)  |
+| DELETE | `/items/:productId` | JWT  | Remove item                       |
+| DELETE | `/`                 | JWT  | Clear entire cart                 |
 
 ### Users (`/api/users`)
 
@@ -163,6 +174,28 @@ tacomex-8bit-shop/
 │       └── ci.yml         # CI pipeline with Playwright
 ├── docker-compose.yaml
 └── README.md
+```
+
+## Rate Limiting
+
+Rate limits are Redis-backed and configurable via environment variables — the defaults are **very permissive in dev** so you can test freely.
+
+| Variable | Dev default | Prod default | Window |
+|---|---|---|---|
+| `RATE_LIMIT_GLOBAL` | 10 000 | 100 | 15 min |
+| `RATE_LIMIT_AUTH` | 1 000 | 5 | 15 min |
+| `RATE_LIMIT_ORDERS` | 1 000 | 10 | 1 hour |
+
+To simulate throttling locally, set low values in your `.env` or inline:
+
+```bash
+# Simulate tight auth throttling (3 login attempts / 15 min)
+RATE_LIMIT_AUTH=3 docker compose up backend
+
+# Or add to your .env:
+# RATE_LIMIT_GLOBAL=10
+# RATE_LIMIT_AUTH=3
+# RATE_LIMIT_ORDERS=2
 ```
 
 ## Development
@@ -262,6 +295,19 @@ jobs:
 | `app-ref` | `main` | Git ref (branch/tag/sha) of the TacoMex repo to checkout |
 | `install-frontend-deps` | `false` | Install frontend deps on the host and restart the container (needed for Playwright) |
 | `frontend-dir` | `frontend` | Relative path to frontend directory |
+| `rate-limit-global` | _(permissive)_ | Set a low number (e.g. `10`) to simulate global throttling in tests |
+| `rate-limit-auth` | _(permissive)_ | Set a low number (e.g. `3`) to simulate auth lockout in tests |
+| `rate-limit-orders` | _(permissive)_ | Set a low number (e.g. `2`) to simulate order throttling in tests |
+
+**Example — testing throttle behaviour:**
+
+```yaml
+- name: Start TacoMex app (tight rate limits)
+  uses: AxeForging/tacomex-8bit-shop/.github/actions/start-app@main
+  with:
+    rate-limit-auth: "3"    # lock out after 3 login attempts
+    rate-limit-orders: "2"  # throttle after 2 orders/hour
+```
 
 ## License
 

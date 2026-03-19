@@ -68,37 +68,13 @@ const Footer: React.FC = () => {
           </ul>
         </div>
 
-        {/* Fun pixel art */}
+        {/* AxeForging logo */}
         <div className="footer__pixel-art">
-          <div className="footer__pixel-taco">
-            <div className="footer__pixel-row">
-              <span style={{background: '#228B22'}}></span>
-              <span style={{background: '#228B22'}}></span>
-              <span style={{background: '#FF6347'}}></span>
-              <span style={{background: '#FFD700'}}></span>
-              <span style={{background: '#FF6347'}}></span>
-              <span style={{background: '#228B22'}}></span>
-              <span style={{background: '#228B22'}}></span>
-            </div>
-            <div className="footer__pixel-row">
-              <span style={{background: '#F4A460'}}></span>
-              <span style={{background: '#8B4513'}}></span>
-              <span style={{background: '#FFD700'}}></span>
-              <span style={{background: '#8B4513'}}></span>
-              <span style={{background: '#FFD700'}}></span>
-              <span style={{background: '#8B4513'}}></span>
-              <span style={{background: '#F4A460'}}></span>
-            </div>
-            <div className="footer__pixel-row">
-              <span></span>
-              <span style={{background: '#DEB887'}}></span>
-              <span style={{background: '#DEB887'}}></span>
-              <span style={{background: '#DEB887'}}></span>
-              <span style={{background: '#DEB887'}}></span>
-              <span style={{background: '#DEB887'}}></span>
-              <span></span>
-            </div>
-          </div>
+          <img
+            src="/axeforging.png"
+            alt="AxeForging"
+            className="footer__axeforging-logo"
+          />
           <p className="footer__pixel-text">Insert Coin</p>
         </div>
       </div>
@@ -106,7 +82,7 @@ const Footer: React.FC = () => {
       {/* Bottom bar */}
       <div className="footer__bottom">
         <p className="footer__copyright">
-          {currentYear} TacoMex 8-Bit Shop. Made with <Heart size={12} className="footer__heart" /> and pixels.
+          {currentYear} TacoMex 8-Bit Shop. Made with <Heart size={12} className="footer__heart" /> and pixels. (by <a href="https://axeforge.io" target="_blank" rel="noopener noreferrer" className="footer__axeforging-link">axeforging</a>)
         </p>
         <p className="footer__credit">
           Press START to order!
