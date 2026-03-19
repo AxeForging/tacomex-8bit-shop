@@ -1,16 +1,66 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { eq, sql, and } from 'drizzle-orm';
-import { db, categories, products } from '../db';
-import { NotFoundError } from '../middleware/errorHandler';
+import { db, categories, products } from '@/db';
+import { NotFoundError } from '@/middleware/errorHandler';
 
 interface CategoryParams {
   id: string;
 }
 
+const CategorySchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'integer', example: 1 },
+    name: { type: 'string', example: 'Tacos' },
+    slug: { type: 'string', example: 'tacos' },
+    description: { type: 'string', example: 'Classic Mexican tacos' },
+    image_url: { type: 'string', nullable: true },
+    display_order: { type: 'integer', example: 1 },
+    created_at: { type: 'string', format: 'date-time' },
+    product_count: { type: 'integer', example: 6 },
+  },
+};
+
+const ProductInCategorySchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'integer', example: 1 },
+    name: { type: 'string', example: 'Pixel Carne Asada Taco' },
+    slug: { type: 'string', example: 'pixel-carne-asada-taco' },
+    description: { type: 'string' },
+    price: { type: 'number', example: 4.49 },
+    image_url: { type: 'string', nullable: true },
+    category_id: { type: 'integer' },
+    is_available: { type: 'boolean', example: true },
+    is_featured: { type: 'boolean', example: false },
+    spice_level: { type: 'integer', example: 2 },
+    prep_time_minutes: { type: 'integer', example: 10 },
+    calories: { type: 'integer', nullable: true },
+    created_at: { type: 'string', format: 'date-time' },
+    updated_at: { type: 'string', format: 'date-time' },
+  },
+};
+
 export default async function categoriesRoutes(fastify: FastifyInstance): Promise<void> {
   // GET /categories - List all categories with product count
   fastify.get(
     '/',
+    {
+      schema: {
+        tags: ['Categories'],
+        summary: 'List categories',
+        description: 'Returns all categories with available product counts.',
+        response: {
+          200: {
+            description: 'Category list',
+            type: 'object',
+            properties: {
+              categories: { type: 'array', items: CategorySchema },
+            },
+          },
+        },
+      },
+    },
     async (_request: FastifyRequest, reply: FastifyReply) => {
       const result = await db
         .select({
@@ -52,6 +102,45 @@ export default async function categoriesRoutes(fastify: FastifyInstance): Promis
   // GET /categories/:id - Get single category with products
   fastify.get<{ Params: CategoryParams }>(
     '/:id',
+    {
+      schema: {
+        tags: ['Categories'],
+        summary: 'Get category with products',
+        description: 'Returns category details along with all available products. Accepts ID or slug.',
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'Category ID or slug (e.g. `1` or `tacos`)' },
+          },
+        },
+        response: {
+          200: {
+            description: 'Category with available products',
+            type: 'object',
+            properties: {
+              category: {
+                type: 'object',
+                properties: {
+                  id: { type: 'integer', example: 1 },
+                  name: { type: 'string', example: 'Tacos' },
+                  slug: { type: 'string', example: 'tacos' },
+                  description: { type: 'string' },
+                  image_url: { type: 'string', nullable: true },
+                  display_order: { type: 'integer' },
+                  created_at: { type: 'string', format: 'date-time' },
+                  products: { type: 'array', items: ProductInCategorySchema },
+                },
+              },
+            },
+          },
+          404: {
+            description: 'Category not found',
+            type: 'object',
+            properties: { error: { type: 'string' } },
+          },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Params: CategoryParams }>, reply: FastifyReply) => {
       const { id } = request.params;
 

@@ -12,7 +12,7 @@ import {
   orderItems,
   orderStatusHistory,
   seedHistory,
-} from '../db';
+} from '@/db';
 
 const SEED_NAME = 'initial_seed_v1';
 

@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { eq, and, sql, desc, inArray } from 'drizzle-orm';
-import { db, sql as pgSql, orders, orderItems, orderStatusHistory, products, productOptions, users, promotions } from '../db';
-import { authenticate, authenticateAdmin } from '../middleware/auth';
-import { ValidationError, NotFoundError, ForbiddenError } from '../middleware/errorHandler';
+import { db, sql as pgSql, orders, orderItems, orderStatusHistory, products, productOptions, users, promotions } from '@/db';
+import { authenticate, authenticateAdmin } from '@/middleware/auth';
+import { ValidationError, NotFoundError, ForbiddenError } from '@/middleware/errorHandler';
 
 const TAX_RATE = 0.0825; // 8.25% tax rate
 
@@ -32,11 +32,105 @@ interface UpdateStatusBody {
   notes?: string;
 }
 
+const OrderItemSchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'integer', example: 1 },
+    order_id: { type: 'integer', example: 1 },
+    product_id: { type: 'integer', example: 1 },
+    product_name: { type: 'string', example: 'Pixel Carne Asada Taco' },
+    quantity: { type: 'integer', example: 2 },
+    unit_price: { type: 'number', example: 4.49 },
+    subtotal: { type: 'number', example: 8.98 },
+    product_image: { type: 'string', nullable: true },
+    options_json: {
+      type: 'object',
+      nullable: true,
+      properties: {
+        option_ids: { type: 'array', items: { type: 'integer' }, example: [2, 36] },
+      },
+    },
+  },
+};
+
+const OrderSchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'integer', example: 1 },
+    user_id: { type: 'integer', example: 2 },
+    status: {
+      type: 'string',
+      enum: ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'],
+      example: 'pending',
+    },
+    subtotal: { type: 'number', example: 13.47 },
+    discount_amount: { type: 'number', example: 0 },
+    tax_amount: { type: 'number', example: 1.11 },
+    total: { type: 'number', example: 14.58 },
+    promotion_id: { type: 'integer', nullable: true, example: null },
+    promotion_code: { type: 'string', nullable: true, example: 'TACO20' },
+    delivery_address: { type: 'string', example: '123 Pixel St, Austin, TX 78701' },
+    delivery_notes: { type: 'string', nullable: true },
+    estimated_delivery: { type: 'string', format: 'date-time', nullable: true },
+    created_at: { type: 'string', format: 'date-time' },
+    updated_at: { type: 'string', format: 'date-time' },
+    user_name: { type: 'string', example: 'Demo Customer' },
+    user_email: { type: 'string', example: 'customer@tacomex.com' },
+    items: { type: 'array', items: OrderItemSchema },
+  },
+};
+
+const PaginationSchema = {
+  type: 'object',
+  properties: {
+    page: { type: 'integer', example: 1 },
+    limit: { type: 'integer', example: 20 },
+    total: { type: 'integer', example: 5 },
+    totalPages: { type: 'integer', example: 1 },
+  },
+};
+
+const ErrorSchema = {
+  type: 'object',
+  properties: { error: { type: 'string' } },
+};
+
 export default async function ordersRoutes(fastify: FastifyInstance): Promise<void> {
   // GET /orders - List orders (users see their own, admins see all)
   fastify.get<{ Querystring: OrdersQuery }>(
     '/',
-    { preHandler: [authenticate] },
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Orders'],
+        summary: 'List orders',
+        description: 'Customers see their own orders. Admins see all orders. Supports filtering by status and pagination.',
+        security: [{ bearerAuth: [] }],
+        querystring: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              enum: ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'],
+              description: 'Filter by order status',
+            },
+            page: { type: 'string', description: 'Page number (default: 1)', default: '1' },
+            limit: { type: 'string', description: 'Results per page, max 100 (default: 20)', default: '20' },
+          },
+        },
+        response: {
+          200: {
+            description: 'Order list with pagination',
+            type: 'object',
+            properties: {
+              orders: { type: 'array', items: OrderSchema },
+              pagination: PaginationSchema,
+            },
+          },
+          401: { description: 'Unauthorized', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Querystring: OrdersQuery }>, reply: FastifyReply) => {
       const { status, page = '1', limit = '20' } = request.query;
       const isAdmin = request.user!.role === 'admin';
@@ -170,7 +264,57 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
   // GET /orders/:id - Get single order
   fastify.get<{ Params: OrderParams }>(
     '/:id',
-    { preHandler: [authenticate] },
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Orders'],
+        summary: 'Get order detail',
+        description: 'Returns full order details including all items and status history. Customers can only view their own orders.',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'Order ID', example: '1' },
+          },
+        },
+        response: {
+          200: {
+            description: 'Order detail with items and status history',
+            type: 'object',
+            properties: {
+              order: {
+                allOf: [
+                  OrderSchema,
+                  {
+                    type: 'object',
+                    properties: {
+                      promotion_description: { type: 'string', nullable: true, example: '20% off your entire order' },
+                      status_history: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            id: { type: 'integer' },
+                            order_id: { type: 'integer' },
+                            status: { type: 'string', example: 'confirmed' },
+                            notes: { type: 'string', nullable: true },
+                            created_at: { type: 'string', format: 'date-time' },
+                            created_by_name: { type: 'string', nullable: true },
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          401: { description: 'Unauthorized', ...ErrorSchema },
+          403: { description: 'Access denied — customers can only view their own orders', ...ErrorSchema },
+          404: { description: 'Order not found', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Params: OrderParams }>, reply: FastifyReply) => {
       const { id } = request.params;
       const isAdmin = request.user!.role === 'admin';
@@ -290,7 +434,50 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
   // POST /orders - Create new order
   fastify.post<{ Body: CreateOrderBody }>(
     '/',
-    { preHandler: [authenticate] },
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Orders'],
+        summary: 'Create order',
+        description: 'Places a new order. Validates product availability, applies promo code discount if provided, calculates tax (8.25%), and sets estimated delivery time (~35 min).',
+        security: [{ bearerAuth: [] }],
+        body: {
+          type: 'object',
+          required: ['items'],
+          properties: {
+            items: {
+              type: 'array',
+              minItems: 1,
+              description: 'List of products to order',
+              items: {
+                type: 'object',
+                required: ['product_id', 'quantity'],
+                properties: {
+                  product_id: { type: 'integer', example: 1 },
+                  quantity: { type: 'integer', minimum: 1, example: 2 },
+                  options: { type: 'array', items: { type: 'integer' }, example: [2, 36], description: 'Option IDs for size/extras' },
+                },
+              },
+            },
+            delivery_address: { type: 'string', example: '123 Pixel St, Austin, TX 78701' },
+            delivery_notes: { type: 'string', example: 'Ring the doorbell' },
+            promotion_code: { type: 'string', example: 'TACO20', description: 'Optional promo code (e.g. TACO20, BURRITO10, FIRSTORDER)' },
+          },
+        },
+        response: {
+          201: {
+            description: 'Order placed successfully',
+            type: 'object',
+            properties: {
+              message: { type: 'string', example: 'Order created successfully' },
+              order: OrderSchema,
+            },
+          },
+          400: { description: 'Validation error (missing items, product unavailable, invalid promo code)', ...ErrorSchema },
+          401: { description: 'Unauthorized', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Body: CreateOrderBody }>, reply: FastifyReply) => {
       const { items, delivery_address, delivery_notes, promotion_code } = request.body;
 
@@ -457,7 +644,54 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
   // PATCH /orders/:id/status - Update order status (admin only)
   fastify.patch<{ Params: OrderParams; Body: UpdateStatusBody }>(
     '/:id/status',
-    { preHandler: [authenticateAdmin] },
+    {
+      preHandler: [authenticateAdmin],
+      schema: {
+        tags: ['Orders'],
+        summary: 'Update order status (admin)',
+        description: 'Updates the status of an order. Admin only. Status flow: `pending` → `confirmed` → `preparing` → `ready` → `delivered` (or `cancelled`). Cannot change cancelled or delivered orders.',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'Order ID', example: '1' },
+          },
+        },
+        body: {
+          type: 'object',
+          required: ['status'],
+          properties: {
+            status: {
+              type: 'string',
+              enum: ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'],
+              example: 'confirmed',
+            },
+            notes: { type: 'string', example: 'Order confirmed by admin' },
+          },
+        },
+        response: {
+          200: {
+            description: 'Status updated',
+            type: 'object',
+            properties: {
+              message: { type: 'string', example: 'Order status updated' },
+              order: {
+                type: 'object',
+                properties: {
+                  id: { type: 'integer' },
+                  status: { type: 'string' },
+                  updated_at: { type: 'string', format: 'date-time' },
+                },
+              },
+            },
+          },
+          400: { description: 'Invalid status or cannot change delivered/cancelled order', ...ErrorSchema },
+          401: { description: 'Unauthorized', ...ErrorSchema },
+          403: { description: 'Admin access required', ...ErrorSchema },
+          404: { description: 'Order not found', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Params: OrderParams; Body: UpdateStatusBody }>, reply: FastifyReply) => {
       const { id } = request.params;
       const { status, notes } = request.body;

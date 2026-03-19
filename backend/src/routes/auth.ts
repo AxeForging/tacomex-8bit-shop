@@ -1,10 +1,11 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import bcrypt from 'bcryptjs';
 import { eq } from 'drizzle-orm';
-import { db, users } from '../db';
-import { authenticate, generateToken } from '../middleware/auth';
-import { ValidationError } from '../middleware/errorHandler';
-import { JwtPayload } from '../types';
+import { db, users } from '@/db';
+import { authenticate, generateToken } from '@/middleware/auth';
+import { ValidationError } from '@/middleware/errorHandler';
+import { JwtPayload } from '@/types';
+import { cache } from '@/config/redis';
 
 // Request body types
 interface RegisterBody {
@@ -18,10 +19,57 @@ interface LoginBody {
   password: string;
 }
 
+const UserSchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'integer', example: 2 },
+    email: { type: 'string', example: 'customer@tacomex.com' },
+    name: { type: 'string', example: 'Demo Customer' },
+    role: { type: 'string', enum: ['customer', 'admin'], example: 'customer' },
+    avatar_url: { type: 'string', nullable: true, example: null },
+    created_at: { type: 'string', format: 'date-time' },
+    updated_at: { type: 'string', format: 'date-time' },
+  },
+};
+
+const AuthResponseSchema = {
+  type: 'object',
+  properties: {
+    message: { type: 'string', example: 'Login successful' },
+    user: UserSchema,
+    token: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIs...' },
+  },
+};
+
+const ErrorSchema = {
+  type: 'object',
+  properties: { error: { type: 'string' } },
+};
+
 export default async function authRoutes(fastify: FastifyInstance): Promise<void> {
   // POST /auth/register
   fastify.post<{ Body: RegisterBody }>(
     '/register',
+    {
+      schema: {
+        tags: ['Auth'],
+        summary: 'Register',
+        description: 'Create a new customer account. Returns a JWT token.',
+        body: {
+          type: 'object',
+          required: ['name', 'email', 'password'],
+          properties: {
+            name: { type: 'string', example: 'John Doe' },
+            email: { type: 'string', format: 'email', example: 'john@example.com' },
+            password: { type: 'string', minLength: 6, example: 'secret123' },
+          },
+        },
+        response: {
+          201: { description: 'Registration successful', ...AuthResponseSchema },
+          400: { description: 'Validation error (missing fields, invalid email, weak password, already registered)', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Body: RegisterBody }>, reply: FastifyReply) => {
       const { email, password, name } = request.body;
 
@@ -94,6 +142,25 @@ export default async function authRoutes(fastify: FastifyInstance): Promise<void
   // POST /auth/login
   fastify.post<{ Body: LoginBody }>(
     '/login',
+    {
+      schema: {
+        tags: ['Auth'],
+        summary: 'Login',
+        description: 'Authenticate with email and password. Returns a JWT bearer token.',
+        body: {
+          type: 'object',
+          required: ['email', 'password'],
+          properties: {
+            email: { type: 'string', format: 'email', example: 'customer@tacomex.com' },
+            password: { type: 'string', example: 'pass123' },
+          },
+        },
+        response: {
+          200: { description: 'Login successful', ...AuthResponseSchema },
+          400: { description: 'Invalid credentials or missing fields', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply) => {
       const { email, password } = request.body;
 
@@ -142,7 +209,23 @@ export default async function authRoutes(fastify: FastifyInstance): Promise<void
   // GET /auth/me
   fastify.get(
     '/me',
-    { preHandler: [authenticate] },
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Auth'],
+        summary: 'Get current user',
+        description: 'Returns the profile of the authenticated user.',
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            description: 'Current user profile',
+            type: 'object',
+            properties: { user: UserSchema },
+          },
+          401: { description: 'Unauthorized — missing or invalid token', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const user = await db.query.users.findFirst({
         where: eq(users.id, request.user!.userId),
@@ -172,6 +255,40 @@ export default async function authRoutes(fastify: FastifyInstance): Promise<void
           updated_at: user.updatedAt,
         },
       });
+    }
+  );
+
+  // POST /auth/logout
+  fastify.post(
+    '/logout',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Auth'],
+        summary: 'Logout',
+        description: 'Invalidates the current JWT by adding it to a Redis blacklist for the remainder of its TTL. Subsequent requests with this token will be rejected with 401.',
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            description: 'Logged out successfully',
+            type: 'object',
+            properties: { message: { type: 'string', example: 'Logged out successfully' } },
+          },
+          401: { description: 'Unauthorized', ...ErrorSchema },
+        },
+      },
+    },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const token = request.headers.authorization?.replace(/^Bearer\s+/i, '');
+      if (token) {
+        // Blacklist the token for its remaining TTL
+        const payload = request.user as JwtPayload & { exp?: number };
+        const ttl = payload.exp
+          ? Math.max(payload.exp - Math.floor(Date.now() / 1000), 1)
+          : 604800; // fallback: 7 days
+        await cache.blacklistToken(token, ttl);
+      }
+      return reply.send({ message: 'Logged out successfully' });
     }
   );
 }

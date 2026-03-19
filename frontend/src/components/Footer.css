@@ -166,22 +166,15 @@
   justify-content: center;
 }
 
-.footer__pixel-taco {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+.footer__axeforging-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  image-rendering: pixelated;
   margin-bottom: 12px;
-}
-
-.footer__pixel-row {
-  display: flex;
-  gap: 0;
-}
-
-.footer__pixel-row span {
-  width: 8px;
-  height: 8px;
-  display: block;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 4px;
+  padding: 4px;
 }
 
 .footer__pixel-text {
@@ -228,6 +221,16 @@
   font-family: 'Press Start 2P', cursive;
   font-size: 0.5rem;
   color: #00A86B;
+}
+
+.footer__axeforging-link {
+  color: #FFD700;
+  text-decoration: none;
+  transition: color 0.1s steps(2);
+}
+
+.footer__axeforging-link:hover {
+  color: #FF6B35;
 }
 
 /* Responsive */

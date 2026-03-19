@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { eq, and, sql, desc, gte, lte } from 'drizzle-orm';
-import { db, promotions } from '../db';
-import { authenticate, authenticateAdmin } from '../middleware/auth';
-import { ValidationError, NotFoundError } from '../middleware/errorHandler';
+import { db, promotions } from '@/db';
+import { authenticateAdmin } from '@/middleware/auth';
+import { ValidationError, NotFoundError } from '@/middleware/errorHandler';
 
 interface PromotionsQuery {
   active?: string;
@@ -41,11 +41,84 @@ interface UpdatePromotionBody {
   is_active?: boolean;
 }
 
+const PromotionSchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'integer', example: 1 },
+    code: { type: 'string', example: 'TACO20' },
+    description: { type: 'string', example: '20% off your entire order' },
+    discount_type: { type: 'string', enum: ['percentage', 'fixed'], example: 'percentage' },
+    discount_value: { type: 'number', example: 20 },
+    min_order_amount: { type: 'number', example: 15 },
+    max_uses: { type: 'integer', nullable: true, example: 500 },
+    current_uses: { type: 'integer', example: 42 },
+    starts_at: { type: 'string', format: 'date-time' },
+    expires_at: { type: 'string', format: 'date-time' },
+    is_active: { type: 'boolean', example: true },
+    created_at: { type: 'string', format: 'date-time' },
+  },
+};
+
+const ActivePromotionSchema = {
+  type: 'object',
+  properties: {
+    code: { type: 'string', example: 'TACO20' },
+    description: { type: 'string', example: '20% off your entire order' },
+    discount_type: { type: 'string', enum: ['percentage', 'fixed'], example: 'percentage' },
+    discount_value: { type: 'number', example: 20 },
+    min_order_amount: { type: 'number', example: 15 },
+    expires_at: { type: 'string', format: 'date-time' },
+  },
+};
+
+const PaginationSchema = {
+  type: 'object',
+  properties: {
+    page: { type: 'integer', example: 1 },
+    limit: { type: 'integer', example: 20 },
+    total: { type: 'integer', example: 5 },
+    totalPages: { type: 'integer', example: 1 },
+  },
+};
+
+const ErrorSchema = {
+  type: 'object',
+  properties: { error: { type: 'string' } },
+};
+
 export default async function promotionsRoutes(fastify: FastifyInstance): Promise<void> {
   // GET /promotions - List all promotions (admin only)
   fastify.get<{ Querystring: PromotionsQuery }>(
     '/',
-    { preHandler: [authenticateAdmin] },
+    {
+      preHandler: [authenticateAdmin],
+      schema: {
+        tags: ['Promotions'],
+        summary: 'List all promotions (admin)',
+        description: 'Admin only. Returns all promotions with usage counts. Supports filtering by active status.',
+        security: [{ bearerAuth: [] }],
+        querystring: {
+          type: 'object',
+          properties: {
+            active: { type: 'string', enum: ['true', 'false'], description: 'Filter by active status' },
+            page: { type: 'string', description: 'Page number (default: 1)', default: '1' },
+            limit: { type: 'string', description: 'Results per page, max 100 (default: 20)', default: '20' },
+          },
+        },
+        response: {
+          200: {
+            description: 'Promotion list',
+            type: 'object',
+            properties: {
+              promotions: { type: 'array', items: PromotionSchema },
+              pagination: PaginationSchema,
+            },
+          },
+          401: { description: 'Unauthorized', ...ErrorSchema },
+          403: { description: 'Admin access required', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Querystring: PromotionsQuery }>, reply: FastifyReply) => {
       const { active, page = '1', limit = '20' } = request.query;
 
@@ -109,6 +182,22 @@ export default async function promotionsRoutes(fastify: FastifyInstance): Promis
   // GET /promotions/active - List active promotions (public)
   fastify.get(
     '/active',
+    {
+      schema: {
+        tags: ['Promotions'],
+        summary: 'List active promotions (public)',
+        description: 'Returns currently active, non-expired promotions. Only a safe subset of fields is exposed (no usage counts or IDs). Current promo codes: `TACO20` `BURRITO10` `FIRSTORDER` `FREEDELIVERY` `8BITDEAL`',
+        response: {
+          200: {
+            description: 'Active promotion list',
+            type: 'object',
+            properties: {
+              promotions: { type: 'array', items: ActivePromotionSchema },
+            },
+          },
+        },
+      },
+    },
     async (_request: FastifyRequest, reply: FastifyReply) => {
       const now = new Date();
 
@@ -148,6 +237,47 @@ export default async function promotionsRoutes(fastify: FastifyInstance): Promis
   // POST /promotions/validate - Validate a promotion code
   fastify.post<{ Body: ValidateBody }>(
     '/validate',
+    {
+      schema: {
+        tags: ['Promotions'],
+        summary: 'Validate promo code',
+        description: 'Validates a promotion code against an order total. Returns the discount amount and new total if valid.',
+        body: {
+          type: 'object',
+          required: ['code'],
+          properties: {
+            code: { type: 'string', example: 'TACO20', description: 'Promotion code (case-insensitive)' },
+            order_total: { type: 'number', example: 25.0, description: 'Order total to calculate discount against' },
+          },
+        },
+        response: {
+          200: {
+            description: 'Validation result. When `valid` is true, `promotion`, `discount_amount`, and `new_total` are present. When `valid` is false, `error` is present.',
+            type: 'object',
+            properties: {
+              valid: { type: 'boolean', example: true },
+              promotion: {
+                type: 'object',
+                description: 'Only present when valid is true',
+                properties: {
+                  code: { type: 'string', example: 'TACO20' },
+                  description: { type: 'string', example: '20% off your entire order' },
+                  discount_type: { type: 'string', enum: ['percentage', 'fixed'] },
+                  discount_value: { type: 'number', example: 20 },
+                  min_order_amount: { type: 'number', example: 15 },
+                  expires_at: { type: 'string', format: 'date-time' },
+                },
+              },
+              discount_amount: { type: 'number', example: 5.0, description: 'Only present when valid is true' },
+              new_total: { type: 'number', example: 20.0, description: 'Only present when valid is true' },
+              error: { type: 'string', example: 'Minimum order amount of $15.00 required', description: 'Only present when valid is false' },
+              min_order_amount: { type: 'number', example: 15.0, description: 'Only present when valid is false and minimum not met' },
+            },
+          },
+          400: { description: 'Missing code field', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Body: ValidateBody }>, reply: FastifyReply) => {
       const { code, order_total } = request.body;
 
@@ -222,7 +352,42 @@ export default async function promotionsRoutes(fastify: FastifyInstance): Promis
   // POST /promotions - Create a new promotion (admin only)
   fastify.post<{ Body: CreatePromotionBody }>(
     '/',
-    { preHandler: [authenticateAdmin] },
+    {
+      preHandler: [authenticateAdmin],
+      schema: {
+        tags: ['Promotions'],
+        summary: 'Create promotion (admin)',
+        description: 'Creates a new promotion code. Admin only.',
+        security: [{ bearerAuth: [] }],
+        body: {
+          type: 'object',
+          required: ['code', 'discount_type', 'discount_value', 'starts_at', 'expires_at'],
+          properties: {
+            code: { type: 'string', example: 'SUMMER25', description: 'Unique promo code (will be uppercased)' },
+            description: { type: 'string', example: '25% off summer menu' },
+            discount_type: { type: 'string', enum: ['percentage', 'fixed'], example: 'percentage' },
+            discount_value: { type: 'number', example: 25, description: 'Percentage (1-100) or fixed dollar amount' },
+            min_order_amount: { type: 'number', example: 10, description: 'Minimum order subtotal required' },
+            max_uses: { type: 'integer', example: 100, description: 'Max total uses (null = unlimited)' },
+            starts_at: { type: 'string', format: 'date-time', example: '2025-06-01T00:00:00Z' },
+            expires_at: { type: 'string', format: 'date-time', example: '2025-09-01T00:00:00Z' },
+          },
+        },
+        response: {
+          201: {
+            description: 'Promotion created',
+            type: 'object',
+            properties: {
+              message: { type: 'string', example: 'Promotion created successfully' },
+              promotion: PromotionSchema,
+            },
+          },
+          400: { description: 'Validation error', ...ErrorSchema },
+          401: { description: 'Unauthorized', ...ErrorSchema },
+          403: { description: 'Admin access required', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Body: CreatePromotionBody }>, reply: FastifyReply) => {
       const {
         code,
@@ -287,7 +452,48 @@ export default async function promotionsRoutes(fastify: FastifyInstance): Promis
   // PATCH /promotions/:id - Update a promotion (admin only)
   fastify.patch<{ Params: PromotionParams; Body: UpdatePromotionBody }>(
     '/:id',
-    { preHandler: [authenticateAdmin] },
+    {
+      preHandler: [authenticateAdmin],
+      schema: {
+        tags: ['Promotions'],
+        summary: 'Update promotion (admin)',
+        description: 'Updates an existing promotion. Admin only. Only provided fields are updated.',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'Promotion ID', example: '1' },
+          },
+        },
+        body: {
+          type: 'object',
+          properties: {
+            description: { type: 'string', example: 'Updated description' },
+            discount_type: { type: 'string', enum: ['percentage', 'fixed'] },
+            discount_value: { type: 'number', example: 15 },
+            min_order_amount: { type: 'number', example: 20 },
+            max_uses: { type: 'integer', example: 200 },
+            starts_at: { type: 'string', format: 'date-time' },
+            expires_at: { type: 'string', format: 'date-time' },
+            is_active: { type: 'boolean', example: false, description: 'Set to false to deactivate without deleting' },
+          },
+        },
+        response: {
+          200: {
+            description: 'Promotion updated',
+            type: 'object',
+            properties: {
+              message: { type: 'string', example: 'Promotion updated successfully' },
+              promotion: PromotionSchema,
+            },
+          },
+          400: { description: 'Validation error', ...ErrorSchema },
+          401: { description: 'Unauthorized', ...ErrorSchema },
+          403: { description: 'Admin access required', ...ErrorSchema },
+          404: { description: 'Promotion not found', ...ErrorSchema },
+        },
+      },
+    },
     async (request: FastifyRequest<{ Params: PromotionParams; Body: UpdatePromotionBody }>, reply: FastifyReply) => {
       const { id } = request.params;
 
