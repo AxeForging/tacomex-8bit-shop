@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
-import { PixelButton } from '../components';
-import { useCart, useAuth } from '../stores';
+import { PixelButton } from '@/components';
+import { useCart, useAuth } from '@/stores';
 import './Cart.css';
 
 const Cart: React.FC = () => {

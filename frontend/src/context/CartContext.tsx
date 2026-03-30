@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { Cart, CartItem, Product, ProductOption } from '../types';
-import { useCart as useCartStore } from '../stores';
+import { Cart, CartItem, Product, ProductOption } from '@/types';
+import { useCart as useCartStore } from '@/stores';
 
 interface CartContextType extends Cart {
   addToCart: (product: Product, quantity?: number, options?: ProductOption[], instructions?: string) => void;

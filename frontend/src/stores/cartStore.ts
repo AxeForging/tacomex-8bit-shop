@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { CartItem, Product, ProductOption } from '../types';
-import { promoApi } from '../services/api';
+import { CartItem, Product, ProductOption } from '@/types';
+import { promoApi } from '@/services/api';
 
 const TAX_RATE = 0.0825; // 8.25% tax
 const DELIVERY_FEE = 3.99;

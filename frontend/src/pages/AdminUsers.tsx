@@ -5,14 +5,15 @@ import {
   Package,
   Users,
   ShoppingBag,
+  Tag,
   Search,
   Mail,
   Shield,
   User as UserIcon,
 } from 'lucide-react';
-import { LoadingSpinner, PixelButton, PixelCard } from '../components';
-import { useUsers } from '../hooks';
-import { usersApi } from '../services/api';
+import { LoadingSpinner, PixelButton, PixelCard } from '@/components';
+import { useUsers } from '@/hooks';
+import { usersApi } from '@/services/api';
 import './Admin.css';
 import './AdminUsers.css';
 
@@ -57,6 +58,10 @@ const AdminUsers: React.FC = () => {
           <Link to="/admin/products" className="admin__nav-link">
             <ShoppingBag size={18} />
             Products
+          </Link>
+          <Link to="/admin/coupons" className="admin__nav-link">
+            <Tag size={18} />
+            Coupons
           </Link>
           <Link to="/admin/users" className="admin__nav-link admin__nav-link--active">
             <Users size={18} />

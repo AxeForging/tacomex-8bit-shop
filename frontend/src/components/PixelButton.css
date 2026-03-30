@@ -5,13 +5,16 @@
   cursor: pointer;
   text-transform: uppercase;
   position: relative;
-  transition: transform 0.1s steps(2), box-shadow 0.1s steps(2);
+  transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.15s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 0.15s ease;
   image-rendering: pixelated;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   white-space: nowrap;
+  overflow: hidden;
 
   /* Pixel art border effect */
   box-shadow:
@@ -20,12 +23,42 @@
     4px 4px 0px rgba(0, 0, 0, 0.5);
 }
 
+/* Holo sweep effect on buttons */
+.pixel-button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.1) 40%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.1) 60%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+
+.pixel-button:hover:not(:disabled)::after {
+  animation: btn-shine 0.5s ease-out forwards;
+}
+
+@keyframes btn-shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 .pixel-button:hover:not(:disabled) {
-  transform: translate(-2px, -2px);
+  transform: translate(-2px, -3px);
   box-shadow:
     inset -4px -4px 0px 0px rgba(0,0,0,0.3),
     inset 4px 4px 0px 0px rgba(255,255,255,0.2),
-    6px 6px 0px rgba(0, 0, 0, 0.5);
+    6px 7px 0px rgba(0, 0, 0, 0.5);
+  filter: brightness(1.1);
 }
 
 .pixel-button:active:not(:disabled) {
@@ -34,6 +67,8 @@
     inset -4px -4px 0px 0px rgba(0,0,0,0.3),
     inset 4px 4px 0px 0px rgba(255,255,255,0.2),
     2px 2px 0px rgba(0, 0, 0, 0.5);
+  filter: brightness(0.95);
+  transition-duration: 0.05s;
 }
 
 .pixel-button:disabled {
@@ -66,6 +101,10 @@
   background-color: transparent;
   color: #FFFFFF;
   border: 4px solid #FFFFFF;
+}
+
+.pixel-button--ghost:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Sizes */

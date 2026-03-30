@@ -35,18 +35,22 @@
 }
 
 @keyframes success-slide {
-  from { transform: translateY(-100%); }
-  to { transform: translateY(0); }
+  0% { transform: translateY(-100%); opacity: 0; }
+  60% { transform: translateY(4px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 
 .order-detail__success-icon {
   font-size: 2.5rem;
-  animation: success-bounce 1s ease-in-out infinite;
+  animation: success-bounce-enhanced 1.5s ease-in-out infinite;
 }
 
-@keyframes success-bounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.2); }
+@keyframes success-bounce-enhanced {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  15% { transform: scale(1.2) rotate(-10deg); }
+  30% { transform: scale(1) rotate(0deg); }
+  45% { transform: scale(1.15) rotate(10deg); }
+  60% { transform: scale(1) rotate(0deg); }
 }
 
 .order-detail__success-content {
@@ -203,8 +207,8 @@
 }
 
 @keyframes step-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
+  50% { transform: scale(1.1); box-shadow: 0 0 12px 4px rgba(255, 215, 0, 0.2); }
 }
 
 .order-detail__step-info {

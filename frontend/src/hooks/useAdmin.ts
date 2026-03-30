@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { User, DashboardStats } from '../types';
-import { usersApi, dashboardApi, transformUser } from '../services/api';
+import { User, DashboardStats } from '@/types';
+import { usersApi, dashboardApi, transformUser } from '@/services/api';
 
 export const useDashboardStats = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);

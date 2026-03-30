@@ -1,5 +1,5 @@
 import React from 'react';
-import { OrderStatus } from '../types';
+import { OrderStatus } from '@/types';
 import './OrderStatusBadge.css';
 
 interface OrderStatusBadgeProps {

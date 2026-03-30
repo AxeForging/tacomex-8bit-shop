@@ -41,8 +41,10 @@
 }
 
 @keyframes float-decoration {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(10deg); }
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+  25% { transform: translateY(-12px) rotate(5deg) scale(1.05); }
+  50% { transform: translateY(-20px) rotate(10deg) scale(1); }
+  75% { transform: translateY(-8px) rotate(-5deg) scale(0.98); }
 }
 
 /* Card */
@@ -53,6 +55,18 @@
   padding: 32px;
   box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.5);
   z-index: 1;
+  animation: auth-card-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes auth-card-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .auth__card--register {
@@ -80,8 +94,10 @@
 }
 
 @keyframes logo-bounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.05) rotate(-5deg); }
+  50% { transform: scale(1.1) rotate(0deg); }
+  75% { transform: scale(1.05) rotate(5deg); }
 }
 
 .auth__title {
@@ -115,6 +131,15 @@
   font-size: 0.45rem;
   color: #DC143C;
   line-height: 1.6;
+  animation: error-slide-shake 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes error-slide-shake {
+  0% { opacity: 0; transform: translateY(-8px); }
+  30% { opacity: 1; transform: translateX(-4px); }
+  60% { transform: translateX(4px); }
+  80% { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
 }
 
 .auth__field {
@@ -141,13 +166,14 @@
   background-color: #16213e;
   border: 3px solid #B8B8D0;
   color: #FFFFFF;
-  transition: border-color 0.1s steps(2), box-shadow 0.1s steps(2);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .auth__input:focus {
   outline: none;
   border-color: #FFD700;
-  box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+  box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2), 0 0 16px rgba(255, 215, 0, 0.1);
+  transform: translateY(-1px);
 }
 
 .auth__input::placeholder {

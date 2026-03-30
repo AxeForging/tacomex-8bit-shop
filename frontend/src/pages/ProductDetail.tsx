@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Minus, ShoppingCart, Check } from 'lucide-react';
-import { PixelButton, SpiceMeter, LoadingSpinner } from '../components';
-import { useProduct } from '../hooks';
-import { useCart } from '../stores';
-import { ProductOption } from '../types';
+import { PixelButton, SpiceMeter, LoadingSpinner } from '@/components';
+import { useProduct } from '@/hooks';
+import { useCart } from '@/stores';
+import { ProductOption } from '@/types';
 import './ProductDetail.css';
 
 const ProductDetail: React.FC = () => {

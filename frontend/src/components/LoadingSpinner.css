@@ -116,10 +116,16 @@
 
 @keyframes taco-bounce {
   0%, 100% {
-    transform: translateY(0) rotate(-5deg);
+    transform: translateY(0) rotate(-5deg) scale(1);
+  }
+  25% {
+    transform: translateY(-8px) rotate(0deg) scale(1.02);
   }
   50% {
-    transform: translateY(-12px) rotate(5deg);
+    transform: translateY(-12px) rotate(5deg) scale(1.05);
+  }
+  75% {
+    transform: translateY(-6px) rotate(2deg) scale(1.02);
   }
 }
 
@@ -140,9 +146,9 @@
 
 @keyframes dot-bounce {
   0%, 100% {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
   50% {
-    transform: translateY(-8px);
+    transform: translateY(-8px) scale(1.2);
   }
 }

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Package, ChevronRight, Calendar, DollarSign } from 'lucide-react';
-import { OrderStatusBadge, LoadingSpinner, PixelButton } from '../components';
-import { useMyOrders } from '../hooks';
+import { OrderStatusBadge, LoadingSpinner, PixelButton } from '@/components';
+import { useMyOrders } from '@/hooks';
 import './OrderHistory.css';
 
 const OrderHistory: React.FC = () => {

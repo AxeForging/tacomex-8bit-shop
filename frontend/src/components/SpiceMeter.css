@@ -11,12 +11,19 @@
 
 .spice-meter__chili {
   display: inline-block;
-  transition: transform 0.1s steps(2);
+  transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .spice-meter__chili--active {
   animation: chili-pulse 0.5s ease-in-out infinite alternate;
 }
+
+/* Stagger the active chili animations */
+.spice-meter__chili--active:nth-child(1) { animation-delay: 0s; }
+.spice-meter__chili--active:nth-child(2) { animation-delay: 0.1s; }
+.spice-meter__chili--active:nth-child(3) { animation-delay: 0.2s; }
+.spice-meter__chili--active:nth-child(4) { animation-delay: 0.3s; }
+.spice-meter__chili--active:nth-child(5) { animation-delay: 0.4s; }
 
 .spice-meter__chili-svg {
   display: block;
@@ -60,17 +67,20 @@
     transform: scale(1);
   }
   100% {
-    transform: scale(1.1);
+    transform: scale(1.15);
   }
 }
 
-/* Hover effect on active chilies */
+/* Hover effect on active chilies - enhanced */
 .spice-meter__chili--active:hover {
-  animation: chili-shake 0.3s ease-in-out;
+  animation: chili-shake-enhanced 0.4s ease-in-out;
 }
 
-@keyframes chili-shake {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-10deg); }
-  75% { transform: rotate(10deg); }
+@keyframes chili-shake-enhanced {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  15% { transform: rotate(-12deg) scale(1.1); }
+  30% { transform: rotate(10deg) scale(1.15); }
+  45% { transform: rotate(-8deg) scale(1.1); }
+  60% { transform: rotate(6deg) scale(1.05); }
+  75% { transform: rotate(-3deg) scale(1.02); }
 }

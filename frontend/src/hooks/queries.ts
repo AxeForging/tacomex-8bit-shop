@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Product, Category, Order } from '../types';
+import { Product, Category, Order } from '@/types';
 import {
   productsApi,
   categoriesApi,
@@ -10,7 +10,7 @@ import {
   transformCategory,
   transformOrder,
   transformUser,
-} from '../services/api';
+} from '@/services/api';
 
 // ============================
 // Query Keys
