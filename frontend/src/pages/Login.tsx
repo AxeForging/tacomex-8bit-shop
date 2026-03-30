@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { User, Lock, Eye, EyeOff } from 'lucide-react';
-import { PixelButton } from '../components';
-import { useAuth } from '../stores';
+import { PixelButton } from '@/components';
+import { useAuth } from '@/stores';
 import './Auth.css';
 
 const Login: React.FC = () => {

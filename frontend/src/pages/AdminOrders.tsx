@@ -5,13 +5,14 @@ import {
   Package,
   Users,
   ShoppingBag,
+  Tag,
   Search,
   ChevronRight,
   RefreshCw,
 } from 'lucide-react';
-import { OrderStatusBadge, LoadingSpinner, PixelButton, PixelCard } from '../components';
-import { useAllOrders, useUpdateOrderStatus } from '../hooks';
-import { OrderStatus } from '../types';
+import { OrderStatusBadge, LoadingSpinner, PixelButton, PixelCard } from '@/components';
+import { useAllOrders, useUpdateOrderStatus } from '@/hooks';
+import { OrderStatus } from '@/types';
 import './Admin.css';
 import './AdminOrders.css';
 
@@ -89,6 +90,10 @@ const AdminOrders: React.FC = () => {
           <Link to="/admin/products" className="admin__nav-link">
             <ShoppingBag size={18} />
             Products
+          </Link>
+          <Link to="/admin/coupons" className="admin__nav-link">
+            <Tag size={18} />
+            Coupons
           </Link>
           <Link to="/admin/users" className="admin__nav-link">
             <Users size={18} />

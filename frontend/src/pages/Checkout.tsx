@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, CreditCard, Tag, Check, X } from 'lucide-react';
-import { PixelButton, LoadingSpinner } from '../components';
-import { useCart } from '../stores';
-import { ordersApi } from '../services/api';
+import { PixelButton, LoadingSpinner } from '@/components';
+import { useCart } from '@/stores';
+import { ordersApi } from '@/services/api';
 import './Checkout.css';
 
 interface DeliveryForm {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCart, User, Menu, X, LogOut, Package, LayoutDashboard } from 'lucide-react';
-import { useAuth, useCart } from '../stores';
+import { useAuth, useCart } from '@/stores';
 import './Navbar.css';
 
 const Navbar: React.FC = () => {

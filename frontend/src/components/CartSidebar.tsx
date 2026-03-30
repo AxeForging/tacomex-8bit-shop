@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Plus, Minus, Trash2, Tag, ShoppingBag } from 'lucide-react';
-import { useCart, useAuth } from '../stores';
-import PixelButton from './PixelButton';
+import { useCart, useAuth } from '@/stores';
+import PixelButton from '@/components/PixelButton';
 import './CartSidebar.css';
 
 const CartSidebar: React.FC = () => {

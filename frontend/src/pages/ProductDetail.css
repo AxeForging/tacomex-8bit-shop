@@ -37,11 +37,13 @@
   cursor: pointer;
   padding: 8px 0;
   margin-bottom: 24px;
-  transition: color 0.1s steps(2);
+  transition: color 0.15s ease, transform 0.15s ease, gap 0.15s ease;
 }
 
 .product-detail__back:hover {
   color: #FFD700;
+  transform: translateX(-4px);
+  gap: 12px;
 }
 
 /* Container */
@@ -102,7 +104,26 @@
 
 @keyframes product-float {
   0%, 100% { transform: translateY(0) rotate(-3deg); }
+  25% { transform: translateY(-10px) rotate(-1deg); }
   50% { transform: translateY(-16px) rotate(3deg); }
+  75% { transform: translateY(-8px) rotate(1deg); }
+}
+
+/* Image hover enhancement */
+.product-detail__image {
+  transition: box-shadow 0.3s ease;
+}
+
+.product-detail__image:hover {
+  box-shadow:
+    inset -4px -4px 0 rgba(0,0,0,0.2),
+    inset 4px 4px 0 rgba(255,255,255,0.1),
+    8px 8px 0 rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(255, 215, 0, 0.1);
+}
+
+.product-detail__image:hover .product-detail__emoji {
+  filter: drop-shadow(8px 8px 0 rgba(0, 0, 0, 0.3)) drop-shadow(0 0 16px rgba(255, 215, 0, 0.2));
 }
 
 .product-detail__featured-badge {
@@ -214,16 +235,24 @@
   background-color: #16213e;
   border: 2px solid #B8B8D0;
   cursor: pointer;
-  transition: all 0.1s steps(2);
+  transition: all 0.15s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .product-detail__option:hover {
   border-color: #FFD700;
+  transform: translateX(4px);
 }
 
 .product-detail__option--selected {
   background-color: #00A86B;
   border-color: #00A86B;
+  animation: option-select 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes option-select {
+  0% { transform: scale(0.97); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
 }
 
 .product-detail__option-check {
@@ -316,12 +345,17 @@
   border: none;
   color: #FFFFFF;
   cursor: pointer;
-  transition: all 0.1s steps(2);
+  transition: all 0.15s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .product-detail__quantity-btn:hover:not(:disabled) {
   background-color: #FFD700;
   color: #1a1a2e;
+  transform: scale(1.1);
+}
+
+.product-detail__quantity-btn:active:not(:disabled) {
+  transform: scale(0.9);
 }
 
 .product-detail__quantity-btn:disabled {

@@ -1,60 +1,66 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Filter, X } from 'lucide-react';
-import { ProductCard, LoadingSpinner, SpiceMeter, PixelButton } from '../components';
-import { useProducts, useCategories } from '../hooks';
+import { Search, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ProductCard, LoadingSpinner, SpiceMeter, PixelButton } from '@/components';
+import { useProducts, useCategories } from '@/hooks';
 import './Menu.css';
+
+const ITEMS_PER_PAGE = 12;
 
 const Menu: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
   const [selectedSpiceLevel, setSelectedSpiceLevel] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
 
-  const { products, isLoading, error } = useProducts();
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, selectedSpiceLevel]);
+
+  // Build API params - server-side search & filtering
+  const apiParams = {
+    ...(debouncedSearch && { search: debouncedSearch }),
+    ...(selectedCategory && { category: selectedCategory }),
+    ...(selectedSpiceLevel !== null && { spiceLevel: selectedSpiceLevel }),
+    page: currentPage,
+    limit: ITEMS_PER_PAGE,
+  };
+
+  const { products, pagination, isLoading, error } = useProducts(apiParams);
   const { categories } = useCategories();
-
-  // Filter products based on search, category, and spice level
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const matchesSearch =
-        searchTerm === '' ||
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesCategory =
-        selectedCategory === '' ||
-        product.categoryId === selectedCategory ||
-        product.category?.name.toLowerCase() === selectedCategory.toLowerCase();
-
-      const matchesSpice =
-        selectedSpiceLevel === null ||
-        product.spiceLevel === selectedSpiceLevel;
-
-      return matchesSearch && matchesCategory && matchesSpice;
-    });
-  }, [products, searchTerm, selectedCategory, selectedSpiceLevel]);
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategory(categoryId);
-    if (categoryId) {
-      setSearchParams({ category: categoryId });
-    } else {
-      setSearchParams({});
-    }
+    const params: Record<string, string> = {};
+    if (categoryId) params.category = categoryId;
+    if (searchTerm) params.search = searchTerm;
+    setSearchParams(params);
   };
 
   const clearFilters = () => {
     setSearchTerm('');
+    setDebouncedSearch('');
     setSelectedCategory('');
     setSelectedSpiceLevel(null);
+    setCurrentPage(1);
     setSearchParams({});
   };
 
   const hasActiveFilters = searchTerm || selectedCategory || selectedSpiceLevel !== null;
 
-  // Category emoji map
   const categoryEmojis: Record<string, string> = {
     tacos: '🌮',
     burritos: '🌯',
@@ -64,6 +70,69 @@ const Menu: React.FC = () => {
     drinks: '🥤',
     desserts: '🍮',
     combos: '🎁',
+  };
+
+  const goToPage = useCallback((page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const renderPagination = () => {
+    if (pagination.totalPages <= 1) return null;
+
+    const pages: (number | string)[] = [];
+    const { page, totalPages } = pagination;
+
+    // Build page numbers with ellipsis
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (page > 3) pages.push('...');
+      for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+        pages.push(i);
+      }
+      if (page < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+
+    return (
+      <div className="menu__pagination">
+        <button
+          className="menu__pagination-btn menu__pagination-btn--nav"
+          onClick={() => goToPage(page - 1)}
+          disabled={page <= 1}
+        >
+          <ChevronLeft size={16} />
+          Prev
+        </button>
+
+        <div className="menu__pagination-pages">
+          {pages.map((p, i) =>
+            typeof p === 'string' ? (
+              <span key={`ellipsis-${i}`} className="menu__pagination-ellipsis">...</span>
+            ) : (
+              <button
+                key={p}
+                className={`menu__pagination-btn ${p === page ? 'menu__pagination-btn--active' : ''}`}
+                onClick={() => goToPage(p)}
+              >
+                {p}
+              </button>
+            )
+          )}
+        </div>
+
+        <button
+          className="menu__pagination-btn menu__pagination-btn--nav"
+          onClick={() => goToPage(page + 1)}
+          disabled={page >= totalPages}
+        >
+          Next
+          <ChevronRight size={16} />
+        </button>
+      </div>
+    );
   };
 
   return (
@@ -84,7 +153,6 @@ const Menu: React.FC = () => {
       <div className="menu__container">
         {/* Search and Filters Bar */}
         <div className="menu__controls">
-          {/* Search */}
           <div className="menu__search">
             <Search size={18} className="menu__search-icon" />
             <input
@@ -104,7 +172,6 @@ const Menu: React.FC = () => {
             )}
           </div>
 
-          {/* Filter toggle (mobile) */}
           <button
             className="menu__filter-toggle"
             onClick={() => setShowFilters(!showFilters)}
@@ -114,7 +181,6 @@ const Menu: React.FC = () => {
             {hasActiveFilters && <span className="menu__filter-badge">!</span>}
           </button>
 
-          {/* Clear filters */}
           {hasActiveFilters && (
             <button className="menu__clear-filters" onClick={clearFilters}>
               <X size={14} />
@@ -125,7 +191,6 @@ const Menu: React.FC = () => {
 
         {/* Filters Panel */}
         <div className={`menu__filters ${showFilters ? 'menu__filters--open' : ''}`}>
-          {/* Category filters */}
           <div className="menu__filter-section">
             <h3 className="menu__filter-title">Category</h3>
             <div className="menu__category-filters">
@@ -138,8 +203,8 @@ const Menu: React.FC = () => {
               {categories.map((category) => (
                 <button
                   key={category.id}
-                  className={`menu__category-btn ${selectedCategory === category.id ? 'menu__category-btn--active' : ''}`}
-                  onClick={() => handleCategoryChange(category.id)}
+                  className={`menu__category-btn ${selectedCategory === category.id || selectedCategory === category.name.toLowerCase() ? 'menu__category-btn--active' : ''}`}
+                  onClick={() => handleCategoryChange(category.name.toLowerCase())}
                 >
                   <span className="menu__category-emoji">
                     {categoryEmojis[category.name.toLowerCase()] || '🌮'}
@@ -150,7 +215,6 @@ const Menu: React.FC = () => {
             </div>
           </div>
 
-          {/* Spice level filter */}
           <div className="menu__filter-section">
             <h3 className="menu__filter-title">Spice Level</h3>
             <div className="menu__spice-filters">
@@ -179,10 +243,15 @@ const Menu: React.FC = () => {
         {/* Results info */}
         <div className="menu__results-info">
           <span className="menu__results-count">
-            {filteredProducts.length} item{filteredProducts.length !== 1 ? 's' : ''} found
+            {pagination.total} item{pagination.total !== 1 ? 's' : ''} found
           </span>
           {hasActiveFilters && (
             <span className="menu__results-filtered">(filtered)</span>
+          )}
+          {pagination.totalPages > 1 && (
+            <span className="menu__results-page">
+              Page {pagination.page} of {pagination.totalPages}
+            </span>
           )}
         </div>
 
@@ -199,7 +268,7 @@ const Menu: React.FC = () => {
               Retry
             </PixelButton>
           </div>
-        ) : filteredProducts.length === 0 ? (
+        ) : products.length === 0 ? (
           <div className="menu__empty">
             <span className="menu__empty-icon">🔍</span>
             <p className="menu__empty-text">No items found</p>
@@ -211,11 +280,14 @@ const Menu: React.FC = () => {
             </PixelButton>
           </div>
         ) : (
-          <div className="menu__grid">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <>
+            <div className="menu__grid">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+            {renderPagination()}
+          </>
         )}
       </div>
     </div>

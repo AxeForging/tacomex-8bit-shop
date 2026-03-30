@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Eye } from 'lucide-react';
-import { Product } from '../types';
-import { useCart } from '../stores';
-import SpiceMeter from './SpiceMeter';
-import PixelButton from './PixelButton';
+import { Product } from '@/types';
+import { useCart } from '@/stores';
+import SpiceMeter from '@/components/SpiceMeter';
+import PixelButton from '@/components/PixelButton';
 import './ProductCard.css';
 
 interface ProductCardProps {
@@ -12,7 +12,6 @@ interface ProductCardProps {
   featured?: boolean;
 }
 
-// Product emoji based on category
 const getCategoryEmoji = (categoryName: string): string => {
   const emojiMap: Record<string, string> = {
     tacos: '🌮',
@@ -30,11 +29,29 @@ const getCategoryEmoji = (categoryName: string): string => {
 const ProductCard: React.FC<ProductCardProps> = ({ product, featured = false }) => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const [addedFeedback, setAddedFeedback] = useState(false);
+  const [coinParticles, setCoinParticles] = useState<Array<{ id: number; x: number; y: number }>>([]);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     addToCart(product, 1);
-  };
+
+    // Trigger visual feedback
+    setAddedFeedback(true);
+    setTimeout(() => setAddedFeedback(false), 600);
+
+    // Spawn coin particles from button position
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const newParticles = Array.from({ length: 3 }, (_, i) => ({
+      id: Date.now() + i,
+      x: rect.left + rect.width / 2 + (Math.random() - 0.5) * 20,
+      y: rect.top,
+    }));
+    setCoinParticles((prev) => [...prev, ...newParticles]);
+    setTimeout(() => {
+      setCoinParticles((prev) => prev.filter((p) => !newParticles.find((np) => np.id === p.id)));
+    }, 700);
+  }, [addToCart, product]);
 
   const handleViewDetails = () => {
     navigate(`/product/${product.id}`);
@@ -42,9 +59,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, featured = false }) 
 
   return (
     <div
-      className={`product-card ${featured ? 'product-card--featured' : ''} ${!product.isAvailable ? 'product-card--unavailable' : ''}`}
+      className={`product-card ${featured ? 'product-card--featured' : ''} ${!product.isAvailable ? 'product-card--unavailable' : ''} ${addedFeedback ? 'product-card--added' : ''}`}
       onClick={handleViewDetails}
     >
+      {/* Coin particles */}
+      {coinParticles.map((p) => (
+        <span
+          key={p.id}
+          className="product-card__coin-particle"
+          style={{ position: 'fixed', left: p.x, top: p.y, zIndex: 9999 }}
+        >
+          ⭐
+        </span>
+      ))}
+
       {/* Featured badge */}
       {featured && (
         <div className="product-card__badge product-card__badge--featured">
@@ -65,6 +93,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, featured = false }) 
           {getCategoryEmoji(product.category?.name || 'tacos')}
         </span>
         <div className="product-card__image-bg"></div>
+        <div className="product-card__image-shine"></div>
       </div>
 
       {/* Product info */}
@@ -77,14 +106,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, featured = false }) 
             : product.description}
         </p>
 
-        {/* Spice level */}
         {product.spiceLevel > 0 && (
           <div className="product-card__spice">
             <SpiceMeter level={product.spiceLevel as 0 | 1 | 2 | 3 | 4 | 5} size="sm" />
           </div>
         )}
 
-        {/* Price and actions */}
         <div className="product-card__footer">
           <div className="product-card__price">
             <span className="product-card__price-symbol">$</span>
@@ -101,7 +128,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, featured = false }) 
             </button>
             {product.isAvailable && (
               <button
-                className="product-card__action-btn product-card__action-btn--cart"
+                className={`product-card__action-btn product-card__action-btn--cart ${addedFeedback ? 'product-card__action-btn--added' : ''}`}
                 onClick={handleAddToCart}
                 title="Add to Cart"
               >

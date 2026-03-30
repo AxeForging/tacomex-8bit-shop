@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Phone, Eye, EyeOff } from 'lucide-react';
-import { PixelButton } from '../components';
-import { useAuth } from '../stores';
+import { PixelButton } from '@/components';
+import { useAuth } from '@/stores';
 import './Auth.css';
 
 const Register: React.FC = () => {

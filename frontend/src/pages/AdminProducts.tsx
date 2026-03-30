@@ -5,16 +5,17 @@ import {
   Package,
   Users,
   ShoppingBag,
+  Tag,
   Plus,
   Edit,
   Trash2,
   Search,
   X,
 } from 'lucide-react';
-import { LoadingSpinner, PixelButton, PixelCard, SpiceMeter } from '../components';
-import { useProducts, useCategories } from '../hooks';
-import { productsApi } from '../services/api';
-import { Product } from '../types';
+import { LoadingSpinner, PixelButton, PixelCard, SpiceMeter } from '@/components';
+import { useProducts, useCategories } from '@/hooks';
+import { productsApi } from '@/services/api';
+import { Product } from '@/types';
 import './Admin.css';
 import './AdminProducts.css';
 
@@ -145,6 +146,10 @@ const AdminProducts: React.FC = () => {
           <Link to="/admin/products" className="admin__nav-link admin__nav-link--active">
             <ShoppingBag size={18} />
             Products
+          </Link>
+          <Link to="/admin/coupons" className="admin__nav-link">
+            <Tag size={18} />
+            Coupons
           </Link>
           <Link to="/admin/users" className="admin__nav-link">
             <Users size={18} />

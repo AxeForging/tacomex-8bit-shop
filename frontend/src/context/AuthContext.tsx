@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
-import { User } from '../types';
-import { useAuthStore } from '../stores';
+import { User } from '@/types';
+import { useAuthStore } from '@/stores';
 
 // Re-export types for backward compatibility
 interface AuthContextType {

@@ -8,9 +8,10 @@ import {
   DollarSign,
   TrendingUp,
   Clock,
+  Tag,
 } from 'lucide-react';
-import { LoadingSpinner, OrderStatusBadge, PixelCard } from '../components';
-import { useDashboardStats } from '../hooks';
+import { LoadingSpinner, OrderStatusBadge, PixelCard } from '@/components';
+import { useDashboardStats } from '@/hooks';
 import './Admin.css';
 
 const AdminDashboard: React.FC = () => {
@@ -81,6 +82,10 @@ const AdminDashboard: React.FC = () => {
           <Link to="/admin/products" className="admin__nav-link">
             <ShoppingBag size={18} />
             Products
+          </Link>
+          <Link to="/admin/coupons" className="admin__nav-link">
+            <Tag size={18} />
+            Coupons
           </Link>
           <Link to="/admin/users" className="admin__nav-link">
             <Users size={18} />
@@ -228,6 +233,10 @@ const AdminDashboard: React.FC = () => {
               <Link to="/admin/users" className="admin__action-btn">
                 <Users size={24} />
                 <span>View Users</span>
+              </Link>
+              <Link to="/admin/coupons" className="admin__action-btn">
+                <Tag size={24} />
+                <span>Manage Coupons</span>
               </Link>
               <Link to="/menu" className="admin__action-btn">
                 <span className="admin__action-emoji">🌮</span>

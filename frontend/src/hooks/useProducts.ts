@@ -1,16 +1,26 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Product, Category } from '../types';
-import { productsApi, categoriesApi, transformProduct, transformCategory } from '../services/api';
+import { Product, Category } from '@/types';
+import { productsApi, categoriesApi, transformProduct, transformCategory } from '@/services/api';
+
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
 interface UseProductsParams {
   category?: string;
   search?: string;
   spiceLevel?: number;
   featured?: boolean;
+  page?: number;
+  limit?: number;
 }
 
 interface UseProductsReturn {
   products: Product[];
+  pagination: Pagination;
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
@@ -18,6 +28,7 @@ interface UseProductsReturn {
 
 export const useProducts = (params?: UseProductsParams): UseProductsReturn => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,19 +39,22 @@ export const useProducts = (params?: UseProductsParams): UseProductsReturn => {
       const response = await productsApi.getAll(params);
       const raw = response.data.products || response.data.data || response.data || [];
       setProducts(Array.isArray(raw) ? raw.map(transformProduct) : []);
+      if (response.data.pagination) {
+        setPagination(response.data.pagination);
+      }
     } catch (err) {
       setError('Failed to load products');
       console.error('Error fetching products:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [params?.category, params?.search, params?.spiceLevel, params?.featured]);
+  }, [params?.category, params?.search, params?.spiceLevel, params?.featured, params?.page, params?.limit]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
-  return { products, isLoading, error, refetch: fetchProducts };
+  return { products, pagination, isLoading, error, refetch: fetchProducts };
 };
 
 export const useProduct = (id: string) => {

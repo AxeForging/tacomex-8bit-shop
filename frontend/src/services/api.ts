@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { Product, Category, ProductOption, User, Order, OrderItem, OrderStatusHistory } from '../types';
+import { Product, Category, ProductOption, User, Order, OrderItem, OrderStatusHistory } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -200,8 +200,8 @@ export const authApi = {
 // Products API
 // ============================
 export const productsApi = {
-  getAll: (params?: { category?: string; search?: string; spiceLevel?: number; featured?: boolean }) =>
-    api.get('/products', { params }),
+  getAll: (params?: { category?: string; search?: string; spiceLevel?: number; featured?: boolean; page?: number; limit?: number }) =>
+    api.get('/products', { params: { ...params, limit: params?.limit ?? 20 } }),
 
   getById: (id: string) =>
     api.get(`/products/${id}`),
@@ -264,6 +264,23 @@ export const promoApi = {
 
   getActive: () =>
     api.get('/promotions/active'),
+};
+
+// ============================
+// Promotions Admin API
+// ============================
+export const promotionsApi = {
+  getAll: (params?: Record<string, unknown>) =>
+    api.get('/promotions', { params }),
+
+  create: (data: Record<string, unknown>) =>
+    api.post('/promotions', data),
+
+  update: (id: string, data: Record<string, unknown>) =>
+    api.patch(`/promotions/${id}`, data),
+
+  validate: (code: string, orderTotal: number) =>
+    api.post('/promotions/validate', { code, order_total: orderTotal }),
 };
 
 // ============================

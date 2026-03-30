@@ -1,12 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from './lib/queryClient';
+import { queryClient } from '@/lib/queryClient';
 // Context providers now use Zustand internally for state management
 // They are kept for backward compatibility, but components can also use stores directly
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { CartProvider } from './context/CartContext';
-import { Navbar, CartSidebar, Footer } from './components';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { CartProvider } from '@/context/CartContext';
+import { Navbar, CartSidebar, Footer } from '@/components';
 import {
   Landing,
   Menu,
@@ -21,7 +21,8 @@ import {
   AdminOrders,
   AdminProducts,
   AdminUsers,
-} from './pages';
+  AdminCoupons,
+} from '@/pages';
 import './styles/global.css';
 
 // Protected route component
@@ -183,6 +184,16 @@ const AppRoutes: React.FC = () => {
           <AdminRoute>
             <AdminLayout>
               <AdminProducts />
+            </AdminLayout>
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/coupons"
+        element={
+          <AdminRoute>
+            <AdminLayout>
+              <AdminCoupons />
             </AdminLayout>
           </AdminRoute>
         }

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, MapPin, Clock, DollarSign, Check } from 'lucide-react';
-import { OrderStatusBadge, LoadingSpinner, PixelButton } from '../components';
-import { useOrder } from '../hooks';
-import { OrderStatus } from '../types';
+import { OrderStatusBadge, LoadingSpinner, PixelButton } from '@/components';
+import { useOrder } from '@/hooks';
+import { OrderStatus } from '@/types';
 import './OrderDetail.css';
 
 const statusSteps: OrderStatus[] = [

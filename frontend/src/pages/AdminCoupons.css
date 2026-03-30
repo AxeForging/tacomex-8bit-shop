@@ -1,0 +1,440 @@
+/* Admin Coupons specific styles */
+.admin-coupons__actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.admin-coupons__search {
+  flex: 1;
+  min-width: 200px;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background-color: #16213e;
+  border: 3px solid #B8B8D0;
+}
+
+.admin-coupons__search:focus-within {
+  border-color: #FFD700;
+}
+
+.admin-coupons__search svg {
+  color: #6B6B80;
+  flex-shrink: 0;
+}
+
+.admin-coupons__search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #FFFFFF;
+}
+
+.admin-coupons__search input:focus {
+  outline: none;
+}
+
+.admin-coupons__search input::placeholder {
+  color: #6B6B80;
+}
+
+.admin-coupons__filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-coupons__filter select {
+  padding: 10px 14px;
+  background-color: #16213e;
+  border: 3px solid #B8B8D0;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.admin-coupons__filter select:focus {
+  outline: none;
+  border-color: #FFD700;
+}
+
+/* Coupons table */
+.admin-coupons__table-wrap {
+  overflow-x: auto;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  background-color: #16213e;
+}
+
+.admin-coupons__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-coupons__table th {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #FFD700;
+  text-align: left;
+  padding: 14px 16px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-bottom: 3px solid rgba(255, 255, 255, 0.1);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-coupons__table td {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.4rem;
+  color: #FFFFFF;
+  padding: 12px 16px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+  white-space: nowrap;
+}
+
+.admin-coupons__table tr:hover td {
+  background-color: rgba(255, 215, 0, 0.05);
+}
+
+.admin-coupons__code {
+  color: #FFD700;
+  font-size: 0.5rem;
+  letter-spacing: 1px;
+}
+
+.admin-coupons__desc {
+  color: #B8B8D0;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-coupons__discount {
+  color: #00A86B;
+  font-size: 0.5rem;
+}
+
+.admin-coupons__usage {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-coupons__usage-bar {
+  width: 60px;
+  height: 8px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.admin-coupons__usage-fill {
+  height: 100%;
+  background-color: #00A86B;
+  transition: width 0.3s steps(5);
+}
+
+.admin-coupons__usage-fill--warning {
+  background-color: #FF6B35;
+}
+
+.admin-coupons__usage-fill--full {
+  background-color: #DC143C;
+}
+
+.admin-coupons__usage-text {
+  color: #B8B8D0;
+  font-size: 0.35rem;
+}
+
+/* Status badges with animations */
+.admin-coupons__status {
+  display: inline-block;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.35rem;
+  padding: 4px 10px;
+  border: 2px solid;
+  text-transform: uppercase;
+  position: relative;
+}
+
+.admin-coupons__status--active {
+  border-color: #00A86B;
+  color: #00A86B;
+  background-color: rgba(0, 168, 107, 0.15);
+  animation: statusPulseActive 2s steps(4) infinite;
+}
+
+.admin-coupons__status--expired {
+  border-color: #DC143C;
+  color: #DC143C;
+  background-color: rgba(220, 20, 60, 0.15);
+  animation: statusBlink 1.5s steps(2) infinite;
+}
+
+.admin-coupons__status--disabled {
+  border-color: #6B6B80;
+  color: #6B6B80;
+  background-color: rgba(107, 107, 128, 0.15);
+}
+
+.admin-coupons__status--scheduled {
+  border-color: #9B59B6;
+  color: #9B59B6;
+  background-color: rgba(155, 89, 182, 0.15);
+  animation: statusPulseScheduled 2.5s steps(6) infinite;
+}
+
+@keyframes statusPulseActive {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 168, 107, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(0, 168, 107, 0.3); }
+}
+
+@keyframes statusBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes statusPulseScheduled {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(155, 89, 182, 0.3); }
+}
+
+/* Table actions */
+.admin-coupons__table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-coupons__action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 2px solid;
+  cursor: pointer;
+  transition: all 0.1s steps(2);
+}
+
+.admin-coupons__action-btn--edit {
+  color: #FFD700;
+  border-color: #FFD700;
+}
+
+.admin-coupons__action-btn--edit:hover {
+  background-color: rgba(255, 215, 0, 0.2);
+}
+
+.admin-coupons__action-btn--toggle {
+  color: #00A86B;
+  border-color: #00A86B;
+}
+
+.admin-coupons__action-btn--toggle.admin-coupons__action-btn--inactive {
+  color: #DC143C;
+  border-color: #DC143C;
+}
+
+.admin-coupons__action-btn--toggle:hover {
+  background-color: rgba(0, 168, 107, 0.2);
+}
+
+.admin-coupons__action-btn--toggle.admin-coupons__action-btn--inactive:hover {
+  background-color: rgba(220, 20, 60, 0.2);
+}
+
+/* Empty state */
+.admin-coupons__empty {
+  text-align: center;
+  padding: 64px;
+}
+
+.admin-coupons__empty span {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.admin-coupons__empty p {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.625rem;
+  color: #B8B8D0;
+  margin-bottom: 24px;
+}
+
+/* Modal */
+.admin-coupons__modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.admin-coupons__modal {
+  background-color: #1f4068;
+  border: 4px solid #FFFFFF;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.5);
+}
+
+.admin-coupons__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-coupons__modal-header h2 {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.75rem;
+  color: #FFD700;
+}
+
+.admin-coupons__modal-close {
+  background: transparent;
+  border: 2px solid #DC143C;
+  color: #DC143C;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.1s steps(2);
+}
+
+.admin-coupons__modal-close:hover {
+  background-color: #DC143C;
+  color: #FFFFFF;
+}
+
+/* Form */
+.admin-coupons__form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-coupons__form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-coupons__form-field label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  color: #B8B8D0;
+  text-transform: uppercase;
+}
+
+.admin-coupons__form-field input,
+.admin-coupons__form-field select,
+.admin-coupons__form-field textarea {
+  padding: 12px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  background-color: #16213e;
+  border: 2px solid #B8B8D0;
+  color: #FFFFFF;
+}
+
+.admin-coupons__form-field input:focus,
+.admin-coupons__form-field select:focus,
+.admin-coupons__form-field textarea:focus {
+  outline: none;
+  border-color: #FFD700;
+}
+
+.admin-coupons__form-field textarea {
+  resize: vertical;
+  min-height: 60px;
+  line-height: 1.6;
+}
+
+.admin-coupons__form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.admin-coupons__form-checkboxes {
+  display: flex;
+  gap: 24px;
+}
+
+.admin-coupons__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.admin-coupons__checkbox input {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background-color: #16213e;
+  border: 2px solid #B8B8D0;
+  cursor: pointer;
+}
+
+.admin-coupons__checkbox input:checked {
+  background-color: #00A86B;
+  border-color: #00A86B;
+}
+
+.admin-coupons__checkbox span {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  color: #B8B8D0;
+}
+
+.admin-coupons__form-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+/* Dates display */
+.admin-coupons__dates {
+  font-size: 0.35rem;
+  color: #B8B8D0;
+  line-height: 1.8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-coupons__form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-coupons__form-checkboxes {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .admin-coupons__table-wrap {
+    font-size: 0.8em;
+  }
+}
