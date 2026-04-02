@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { Product, Category, ProductOption, User, Order, OrderItem, OrderStatusHistory } from '@/types';
+import { Product, Category, ProductOption, User, Order, OrderItem, OrderStatusHistory, Notification } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -182,6 +182,21 @@ export function transformStatusHistory(raw: Record<string, unknown>): OrderStatu
   };
 }
 
+export function transformNotification(raw: Record<string, unknown>): Notification {
+  return {
+    id: raw.id as number,
+    userId: (raw.user_id ?? raw.userId) as number,
+    channel: (raw.channel as 'email' | 'sms'),
+    subject: (raw.subject as string | null),
+    body: (raw.body as string) || '',
+    fromAddress: ((raw.from_address ?? raw.fromAddress) as string) || '',
+    toAddress: ((raw.to_address ?? raw.toAddress) as string) || '',
+    isRead: (raw.is_read ?? raw.isRead ?? false) as boolean,
+    metadata: (raw.metadata as Record<string, unknown> | null) || null,
+    createdAt: ((raw.created_at ?? raw.createdAt) as string) || '',
+  };
+}
+
 // ============================
 // Auth API
 // ============================
@@ -326,6 +341,20 @@ export const dashboardApi = {
       },
     };
   },
+};
+
+// ============================
+// Notifications API
+// ============================
+export const notificationsApi = {
+  getAll: (params?: { channel?: 'email' | 'sms'; page?: number; limit?: number }) =>
+    api.get('/notifications', { params }),
+
+  markRead: (id: number) =>
+    api.patch(`/notifications/${id}/read`),
+
+  markAllRead: () =>
+    api.post('/notifications/read-all'),
 };
 
 export default api;

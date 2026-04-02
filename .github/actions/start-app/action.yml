@@ -82,6 +82,7 @@ runs:
         docker pull node:20-alpine &
         docker pull postgres:15-alpine &
         docker pull redis:7-alpine &
+        docker pull rabbitmq:3.13-management-alpine &
         wait
 
     - name: Start services

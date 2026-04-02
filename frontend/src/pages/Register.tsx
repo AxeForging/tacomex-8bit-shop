@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Phone, Eye, EyeOff } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { PixelButton } from '@/components';
 import { useAuth } from '@/stores';
 import './Auth.css';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { register, isLoading } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -51,6 +53,8 @@ const Register: React.FC = () => {
         password: formData.password,
         phone: formData.phone || undefined,
       });
+      // Invalidate notifications so the bell shows the welcome SMS
+      setTimeout(() => queryClient.invalidateQueries({ queryKey: ['notifications'] }), 2000);
       navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.error || err.response?.data?.message || 'Registration failed. Please try again.');

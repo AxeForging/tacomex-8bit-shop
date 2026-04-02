@@ -19,7 +19,12 @@ export async function registerSwagger(fastify: FastifyInstance): Promise<void> {
           '| Admin | admin@tacomex.com | admin123 |\n' +
           '| Customer | customer@tacomex.com | pass123 |\n\n' +
           '## Promo Codes\n' +
-          '`TACO20` `BURRITO10` `FIRSTORDER` `FREEDELIVERY` `8BITDEAL`',
+          '`TACO20` `BURRITO10` `FIRSTORDER` `FREEDELIVERY` `8BITDEAL`\n\n' +
+          '## Notifications\n' +
+          'Fake email and SMS are sent via RabbitMQ queues and stored in the database.\n' +
+          '- **Email**: Sent on order creation and status changes\n' +
+          '- **SMS**: Sent on user registration, order ready, and order delivered\n\n' +
+          'RabbitMQ Management: http://localhost:15672 (tacomex/tacomex_secret)',
         version: '2.0.0',
         contact: {
           name: 'TacoMex Dev Team',
@@ -36,6 +41,7 @@ export async function registerSwagger(fastify: FastifyInstance): Promise<void> {
         { name: 'Cart', description: 'Shopping cart (Redis-backed, 24 h TTL)' },
         { name: 'Orders', description: 'Order management' },
         { name: 'Promotions', description: 'Promo codes & discounts' },
+        { name: 'Notifications', description: 'Email & SMS notifications (via RabbitMQ)' },
         { name: 'Users', description: 'User management (admin)' },
       ],
       components: {
@@ -347,6 +353,23 @@ export async function registerSwagger(fastify: FastifyInstance): Promise<void> {
                 example: 'confirmed',
               },
               notes: { type: 'string', example: 'Order confirmed by admin' },
+            },
+          },
+
+          // ── Notifications ──
+          Notification: {
+            type: 'object',
+            properties: {
+              id: { type: 'integer', example: 1 },
+              user_id: { type: 'integer', example: 2 },
+              channel: { type: 'string', enum: ['email', 'sms'], example: 'email' },
+              subject: { type: 'string', nullable: true, example: 'Order #1 Confirmed - TacoMex 8-BIT' },
+              body: { type: 'string', example: 'Hola! Your order has been placed successfully.' },
+              from_address: { type: 'string', example: 'noreply@tacomex8bit.shop' },
+              to_address: { type: 'string', example: 'customer@tacomex.com' },
+              is_read: { type: 'boolean', example: false },
+              metadata: { type: 'object', nullable: true },
+              created_at: { type: 'string', format: 'date-time' },
             },
           },
 

@@ -7,8 +7,10 @@ import rateLimit from '@fastify/rate-limit';
 import { getJwtConfig } from '@/middleware/auth';
 import { errorHandler, notFoundHandler } from '@/middleware/errorHandler';
 import { redis } from '@/config/redis';
+import { connectRabbitMQ, closeRabbitMQ, testRabbitMQ } from '@/config/rabbitmq';
 import { testConnection } from '@/db';
 import { registerSwagger } from '@/plugins/swagger';
+import { startConsumers } from '@/services/notificationConsumer';
 
 // Import routes
 import authRoutes from '@/routes/auth';
@@ -18,6 +20,7 @@ import ordersRoutes from '@/routes/orders';
 import usersRoutes from '@/routes/users';
 import promotionsRoutes from '@/routes/promotions';
 import cartRoutes from '@/routes/cart';
+import notificationsRoutes from '@/routes/notifications';
 
 const PORT = parseInt(process.env.PORT || '3001');
 const HOST = process.env.HOST || '0.0.0.0';
@@ -99,6 +102,7 @@ async function buildServer(): Promise<FastifyInstance> {
             service: { type: 'string', example: 'TacoMex 8-bit Shop API' },
             version: { type: 'string', example: '2.0.0' },
             redis: { type: 'string', enum: ['connected', 'disconnected', 'error'], example: 'connected' },
+            rabbitmq: { type: 'string', enum: ['connected', 'disconnected', 'error'], example: 'connected' },
             database: { type: 'string', enum: ['connected', 'disconnected', 'error'], example: 'connected' },
           },
         },
@@ -106,6 +110,7 @@ async function buildServer(): Promise<FastifyInstance> {
     },
   }, async (_request, reply) => {
     let redisStatus = 'disconnected';
+    let rabbitmqStatus = 'disconnected';
     let dbStatus = 'disconnected';
 
     try {
@@ -113,6 +118,13 @@ async function buildServer(): Promise<FastifyInstance> {
       redisStatus = 'connected';
     } catch {
       redisStatus = 'error';
+    }
+
+    try {
+      const rmqOk = await testRabbitMQ();
+      rabbitmqStatus = rmqOk ? 'connected' : 'error';
+    } catch {
+      rabbitmqStatus = 'error';
     }
 
     try {
@@ -128,6 +140,7 @@ async function buildServer(): Promise<FastifyInstance> {
       service: 'TacoMex 8-bit Shop API',
       version: '2.0.0',
       redis: redisStatus,
+      rabbitmq: rabbitmqStatus,
       database: dbStatus,
     });
   });
@@ -163,6 +176,7 @@ async function buildServer(): Promise<FastifyInstance> {
         cart: '/api/cart',
         users: '/api/users',
         promotions: '/api/promotions',
+        notifications: '/api/notifications',
       },
     });
   });
@@ -213,6 +227,9 @@ async function buildServer(): Promise<FastifyInstance> {
 
     // Cart routes (Redis-backed, per user)
     await api.register(cartRoutes, { prefix: '/cart' });
+
+    // Notifications routes
+    await api.register(notificationsRoutes, { prefix: '/notifications' });
   }, { prefix: '/api' });
 
   return fastify;
@@ -223,6 +240,9 @@ async function start(): Promise<void> {
     // Connect to Redis first (before building server, since rate-limit needs it)
     await redis.connect();
 
+    // Connect to RabbitMQ
+    await connectRabbitMQ();
+
     // Test database connection
     const dbConnected = await testConnection();
     if (!dbConnected) {
@@ -231,6 +251,9 @@ async function start(): Promise<void> {
     }
 
     const fastify = await buildServer();
+
+    // Start notification queue consumers
+    await startConsumers();
 
     // Start server
     await fastify.listen({ port: PORT, host: HOST });
@@ -245,6 +268,7 @@ async function start(): Promise<void> {
   ║   Health: http://localhost:${PORT}/health               ║
   ║   API:    http://localhost:${PORT}/api                  ║
   ║   Docs:   http://localhost:${PORT}/docs                 ║
+  ║   Rabbit: http://localhost:15672              ║
   ║                                                       ║
   ╚═══════════════════════════════════════════════════════╝
     `);
@@ -255,6 +279,7 @@ async function start(): Promise<void> {
       process.on(signal, async () => {
         console.log(`\nReceived ${signal}, shutting down gracefully...`);
         await fastify.close();
+        await closeRabbitMQ();
         await redis.quit();
         process.exit(0);
       });

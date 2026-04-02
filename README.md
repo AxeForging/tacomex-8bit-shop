@@ -10,6 +10,7 @@ A full-stack retro-themed Mexican food delivery platform built with Fastify, Rea
 | Frontend   | React 18, Vite 5, Zustand, React Query  |
 | Database   | PostgreSQL 15                            |
 | Cache      | Redis 7                                 |
+| Queue      | RabbitMQ 3.13 (notifications)           |
 | Infra      | Docker Compose                          |
 
 ## Quick Start
@@ -20,12 +21,13 @@ cd tacomex-8bit-shop
 docker compose up --build
 ```
 
-| Service   | URL                          |
-|-----------|------------------------------|
-| Frontend  | http://localhost:5173        |
-| API       | http://localhost:3001/api    |
-| Swagger   | http://localhost:3001/docs   |
-| Health    | http://localhost:3001/health |
+| Service     | URL                          |
+|-------------|------------------------------|
+| Frontend    | http://localhost:5173        |
+| API         | http://localhost:3001/api    |
+| Swagger     | http://localhost:3001/docs   |
+| Health      | http://localhost:3001/health |
+| RabbitMQ UI | http://localhost:15672       |
 
 The seed service runs automatically on first start and populates the database with sample data.
 
@@ -63,6 +65,17 @@ No password required.
 ```bash
 redis-cli -h localhost -p 6379
 ```
+
+### RabbitMQ
+
+```
+Host: localhost
+Port: 5672 (AMQP) / 15672 (Management UI)
+User: tacomex
+Password: tacomex_secret
+```
+
+Open http://localhost:15672 to access the management dashboard.
 
 ## API Endpoints
 
@@ -117,6 +130,18 @@ redis-cli -h localhost -p 6379
 | POST   | `/`         | Admin | Create promotion         |
 | PATCH  | `/:id`      | Admin | Update promotion         |
 
+### Notifications (`/api/notifications`) — RabbitMQ queue → PostgreSQL
+
+| Method | Endpoint       | Auth | Description                       |
+|--------|----------------|------|-----------------------------------|
+| GET    | `/`            | JWT  | List notifications (email/sms)    |
+| PATCH  | `/:id/read`    | JWT  | Mark notification as read         |
+| POST   | `/read-all`    | JWT  | Mark all notifications as read    |
+
+**Triggers:**
+- **Email**: Order placed, order status change (confirmed, preparing, ready, delivered, cancelled)
+- **SMS**: User registration (welcome), order ready for pickup/delivery, order delivered
+
 ### Cart (`/api/cart`) — Redis-backed, per user, 24 h TTL
 
 | Method | Endpoint            | Auth | Description                       |
@@ -148,11 +173,12 @@ redis-cli -h localhost -p 6379
 tacomex-8bit-shop/
 ├── backend/
 │   ├── src/
-│   │   ├── config/        # Redis configuration
+│   │   ├── config/        # Redis & RabbitMQ configuration
 │   │   ├── db/            # Drizzle schema & connection
 │   │   ├── middleware/    # Auth (JWT) & error handling
 │   │   ├── plugins/       # Swagger/OpenAPI docs
 │   │   ├── routes/        # API route handlers
+│   │   ├── services/      # Notification publisher & consumer
 │   │   ├── seeds/         # Database seeding
 │   │   └── index.ts       # Server entry point
 │   └── Dockerfile
