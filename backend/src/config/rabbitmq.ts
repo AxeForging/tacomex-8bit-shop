@@ -1,4 +1,5 @@
-import amqp, { Connection, Channel } from 'amqplib';
+import amqp from 'amqplib';
+import type { Channel } from 'amqplib';
 
 const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://tacomex:tacomex_secret@localhost:5672';
 
@@ -11,7 +12,7 @@ export const QUEUES = {
 // Exchange
 const EXCHANGE = 'tacomex.notifications';
 
-let connection: Connection | null = null;
+let connection: Awaited<ReturnType<typeof amqp.connect>> | null = null;
 let publishChannel: Channel | null = null;
 
 export async function connectRabbitMQ(): Promise<void> {
@@ -20,23 +21,25 @@ export async function connectRabbitMQ(): Promise<void> {
 
   while (retries < maxRetries) {
     try {
-      connection = await amqp.connect(RABBITMQ_URL);
-      publishChannel = await connection.createChannel();
+      const conn = await amqp.connect(RABBITMQ_URL);
+      connection = conn;
+      const ch = await conn.createChannel();
+      publishChannel = ch;
 
       // Declare exchange and queues
-      await publishChannel.assertExchange(EXCHANGE, 'direct', { durable: true });
-      await publishChannel.assertQueue(QUEUES.EMAIL, { durable: true });
-      await publishChannel.assertQueue(QUEUES.SMS, { durable: true });
-      await publishChannel.bindQueue(QUEUES.EMAIL, EXCHANGE, 'email');
-      await publishChannel.bindQueue(QUEUES.SMS, EXCHANGE, 'sms');
+      await ch.assertExchange(EXCHANGE, 'direct', { durable: true });
+      await ch.assertQueue(QUEUES.EMAIL, { durable: true });
+      await ch.assertQueue(QUEUES.SMS, { durable: true });
+      await ch.bindQueue(QUEUES.EMAIL, EXCHANGE, 'email');
+      await ch.bindQueue(QUEUES.SMS, EXCHANGE, 'sms');
 
       console.log('RabbitMQ connected and queues initialized');
 
-      connection.on('error', (err) => {
+      conn.on('error', (err: Error) => {
         console.error('RabbitMQ connection error:', err);
       });
 
-      connection.on('close', () => {
+      conn.on('close', () => {
         console.warn('RabbitMQ connection closed');
         publishChannel = null;
         connection = null;
@@ -81,7 +84,6 @@ export async function getChannel(): Promise<Channel | null> {
 export async function testRabbitMQ(): Promise<boolean> {
   try {
     if (!connection) return false;
-    // Check if connection is still alive
     const ch = await connection.createChannel();
     await ch.close();
     return true;
