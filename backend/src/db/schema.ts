@@ -44,6 +44,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   orders: many(orders),
   orderStatusHistory: many(orderStatusHistory),
   favorites: many(userFavorites),
+  notifications: many(notifications),
 }));
 
 // =============================================================================
@@ -253,6 +254,32 @@ export const userFavoritesRelations = relations(userFavorites, ({ one }) => ({
 }));
 
 // =============================================================================
+// Notifications Table (fake email & SMS stored from RabbitMQ queue)
+// =============================================================================
+
+export const notifications = pgTable('notifications', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  channel: varchar('channel', { length: 10 }).notNull().$type<'email' | 'sms'>(),
+  subject: varchar('subject', { length: 500 }),
+  body: text('body').notNull(),
+  fromAddress: varchar('from_address', { length: 255 }),
+  toAddress: varchar('to_address', { length: 255 }).notNull(),
+  isRead: boolean('is_read').default(false),
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => [
+  check('channel_check', sql`${table.channel} IN ('email', 'sms')`),
+]);
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
+// =============================================================================
 // Type Exports
 // =============================================================================
 
@@ -282,3 +309,6 @@ export type NewOrderStatusHistoryItem = typeof orderStatusHistory.$inferInsert;
 
 export type UserFavorite = typeof userFavorites.$inferSelect;
 export type NewUserFavorite = typeof userFavorites.$inferInsert;
+
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;

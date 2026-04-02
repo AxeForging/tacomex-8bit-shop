@@ -3,6 +3,7 @@ import { eq, and, sql, desc, inArray } from 'drizzle-orm';
 import { db, sql as pgSql, orders, orderItems, orderStatusHistory, products, productOptions, users, promotions } from '@/db';
 import { authenticate, authenticateAdmin } from '@/middleware/auth';
 import { ValidationError, NotFoundError, ForbiddenError } from '@/middleware/errorHandler';
+import { sendOrderConfirmationEmail, sendOrderStatusEmail, sendOrderStatusSms } from '@/services/notificationPublisher';
 
 const TAX_RATE = 0.0825; // 8.25% tax rate
 
@@ -612,6 +613,21 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
         return { order, items: orderItemsData };
       });
 
+      // Send order confirmation email via RabbitMQ
+      sendOrderConfirmationEmail({
+        userId: request.user!.userId,
+        email: request.user!.email,
+        orderId: result.order.id,
+        total: result.order.total,
+        items: result.items.map((i) => ({
+          name: i.product_name,
+          quantity: i.quantity,
+          price: i.subtotal,
+        })),
+        deliveryAddress: result.order.delivery_address,
+        estimatedDelivery: result.order.estimated_delivery,
+      }).catch((err) => console.error('Failed to send order confirmation email:', err));
+
       return reply.status(201).send({
         message: 'Order created successfully',
         order: {
@@ -730,6 +746,34 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
         notes: notes || null,
         createdBy: request.user!.userId,
       });
+
+      // Send order status update email via RabbitMQ
+      if (order.userId) {
+        const [orderUser] = await db
+          .select({ email: users.email })
+          .from(users)
+          .where(eq(users.id, order.userId))
+          .limit(1);
+
+        if (orderUser) {
+          sendOrderStatusEmail({
+            userId: order.userId,
+            email: orderUser.email,
+            orderId: parseInt(id),
+            status,
+            notes,
+          }).catch((err) => console.error('Failed to send order status email:', err));
+
+          // Send SMS for ready and delivered statuses
+          if (status === 'ready' || status === 'delivered') {
+            sendOrderStatusSms({
+              userId: order.userId,
+              orderId: parseInt(id),
+              status,
+            }).catch((err) => console.error('Failed to send order status SMS:', err));
+          }
+        }
+      }
 
       return reply.send({
         message: 'Order status updated',

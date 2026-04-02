@@ -1,4 +1,21 @@
 services:
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: tacomex-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: tacomex
+      RABBITMQ_DEFAULT_PASS: tacomex_secret
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:7-alpine
     container_name: tacomex-redis
@@ -40,6 +57,7 @@ services:
       NODE_ENV: development
       DATABASE_URL: postgresql://tacomex:tacomex_secret@postgres:5432/tacomex_shop
       REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://tacomex:tacomex_secret@rabbitmq:5672
       JWT_SECRET: tacomex_jwt_super_secret_key_8bit
       PORT: 3001
     ports:
@@ -51,6 +69,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     command: npm run dev
 
@@ -87,3 +107,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  rabbitmq_data:

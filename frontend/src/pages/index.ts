@@ -12,3 +12,4 @@ export { default as AdminOrders } from './AdminOrders';
 export { default as AdminProducts } from './AdminProducts';
 export { default as AdminUsers } from './AdminUsers';
 export { default as AdminCoupons } from './AdminCoupons';
+export { default as Messages } from './Messages';

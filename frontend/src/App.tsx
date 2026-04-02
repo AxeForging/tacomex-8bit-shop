@@ -22,6 +22,7 @@ import {
   AdminProducts,
   AdminUsers,
   AdminCoupons,
+  Messages,
 } from '@/pages';
 import './styles/global.css';
 
@@ -152,6 +153,16 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <MainLayout>
               <OrderDetail />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/messages"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Messages />
             </MainLayout>
           </ProtectedRoute>
         }

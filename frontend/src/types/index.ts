@@ -149,6 +149,20 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
+// Notification Types
+export interface Notification {
+  id: number;
+  userId: number;
+  channel: 'email' | 'sms';
+  subject: string | null;
+  body: string;
+  fromAddress: string;
+  toAddress: string;
+  isRead: boolean;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+}
+
 // Admin Stats Types
 export interface DashboardStats {
   totalOrders: number;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, CreditCard, Tag, Check, X } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { PixelButton, LoadingSpinner } from '@/components';
 import { useCart } from '@/stores';
 import { ordersApi } from '@/services/api';
@@ -17,6 +18,7 @@ interface DeliveryForm {
 
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const {
     items,
     subtotal,
@@ -99,6 +101,8 @@ const Checkout: React.FC = () => {
       const order = response.data.order || response.data.data || response.data;
 
       clearCart();
+      // Invalidate notifications so the bell updates with the order confirmation email
+      setTimeout(() => queryClient.invalidateQueries({ queryKey: ['notifications'] }), 2000);
       navigate(`/order/${order.id}`, { state: { isNew: true } });
     } catch (err: any) {
       setError(err.response?.data?.error || err.response?.data?.message || 'Failed to place order. Please try again.');

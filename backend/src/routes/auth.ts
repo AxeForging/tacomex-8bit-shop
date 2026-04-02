@@ -6,6 +6,7 @@ import { authenticate, generateToken } from '@/middleware/auth';
 import { ValidationError } from '@/middleware/errorHandler';
 import { JwtPayload } from '@/types';
 import { cache } from '@/config/redis';
+import { sendWelcomeSms } from '@/services/notificationPublisher';
 
 // Request body types
 interface RegisterBody {
@@ -123,6 +124,12 @@ export default async function authRoutes(fastify: FastifyInstance): Promise<void
         role: newUser.role as 'customer' | 'admin',
       };
       const token = generateToken(fastify, tokenPayload);
+
+      // Send welcome SMS via RabbitMQ
+      sendWelcomeSms({
+        userId: newUser.id,
+        name: newUser.name,
+      }).catch((err) => console.error('Failed to send welcome SMS:', err));
 
       return reply.status(201).send({
         message: 'Registration successful',

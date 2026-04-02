@@ -122,6 +122,20 @@ CREATE TABLE IF NOT EXISTS user_favorites (
     PRIMARY KEY (user_id, product_id)
 );
 
+-- Notifications (fake email & SMS via RabbitMQ queue)
+CREATE TABLE IF NOT EXISTS notifications (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    channel VARCHAR(10) NOT NULL CHECK (channel IN ('email', 'sms')),
+    subject VARCHAR(500),
+    body TEXT NOT NULL,
+    from_address VARCHAR(255),
+    to_address VARCHAR(255) NOT NULL,
+    is_read BOOLEAN DEFAULT false,
+    metadata JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_featured ON products(is_featured) WHERE is_featured = true;
@@ -130,3 +144,5 @@ CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_promotions_code ON promotions(code);
 CREATE INDEX IF NOT EXISTS idx_promotions_active ON promotions(is_active) WHERE is_active = true;
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_channel ON notifications(user_id, channel);
