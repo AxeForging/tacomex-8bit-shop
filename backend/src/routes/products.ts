@@ -503,7 +503,7 @@ export default async function productsRoutes(fastify: FastifyInstance): Promise<
         },
       },
     },
-    async (request: FastifyRequest<{ Body: Record<string, unknown> }>, reply: FastifyReply) => {
+    async (request, reply) => {
       const { name, description, price, categoryId, spiceLevel, isAvailable, isFeatured } = request.body as {
         name: string; description?: string; price: number; categoryId?: string;
         spiceLevel?: number; isAvailable?: boolean; isFeatured?: boolean;
@@ -573,8 +573,8 @@ export default async function productsRoutes(fastify: FastifyInstance): Promise<
         },
       },
     },
-    async (request: FastifyRequest<{ Params: ProductParams; Body: Record<string, unknown> }>, reply: FastifyReply) => {
-      const { id } = request.params;
+    async (request, reply) => {
+      const { id } = (request as FastifyRequest<{ Params: ProductParams }>).params;
       const body = request.body as Record<string, unknown>;
 
       const existing = await db.query.products.findFirst({ where: eq(products.id, parseInt(id)) });
