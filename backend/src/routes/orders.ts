@@ -146,7 +146,7 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
 
       // Filter by status
       if (status) {
-        conditions.push(eq(orders.status, status as typeof orders.status.dataType));
+        conditions.push(eq(orders.status, status as 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled'));
       }
 
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -489,6 +489,8 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
 
       // Use a transaction
       const result = await pgSql.begin(async (tx) => {
+        // TransactionSql extends Omit<Sql, ...> which drops call signatures — cast to restore them
+        const q = tx as unknown as typeof pgSql;
         // Validate and calculate item subtotals
         let subtotal = 0;
         const orderItemsData: Array<{
@@ -505,7 +507,7 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
             throw new ValidationError('Each item must have product_id and quantity');
           }
 
-          const [product] = await tx`
+          const [product] = await q`
             SELECT id, name, price, is_available FROM products WHERE id = ${item.product_id}
           `;
 
@@ -522,7 +524,7 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
           // Apply options price modifiers
           if (item.options && Array.isArray(item.options)) {
             for (const optionId of item.options) {
-              const [option] = await tx`
+              const [option] = await q`
                 SELECT price_modifier FROM product_options
                 WHERE id = ${optionId} AND product_id = ${item.product_id}
               `;
@@ -550,7 +552,7 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
         let promotionId: number | null = null;
 
         if (promotion_code) {
-          const [promo] = await tx`
+          const [promo] = await q`
             SELECT * FROM promotions
             WHERE code = ${promotion_code.toUpperCase()}
             AND is_active = true
@@ -569,7 +571,7 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
             }
 
             // Update promotion usage
-            await tx`
+            await q`
               UPDATE promotions SET current_uses = current_uses + 1 WHERE id = ${promo.id}
             `;
           }
@@ -586,7 +588,7 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
         const estimatedDeliveryStr = estimatedDelivery.toISOString();
 
         // Create order
-        const [order] = await tx`
+        const [order] = await q`
           INSERT INTO orders (user_id, status, subtotal, discount_amount, tax_amount, total,
                               promotion_id, delivery_address, delivery_notes, estimated_delivery)
           VALUES (${request.user!.userId}, 'pending', ${subtotal.toFixed(2)}, ${discountAmount.toFixed(2)},
@@ -597,7 +599,7 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
 
         // Create order items
         for (const item of orderItemsData) {
-          await tx`
+          await q`
             INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, options_json, subtotal)
             VALUES (${order.id}, ${item.product_id}, ${item.product_name}, ${item.quantity},
                     ${item.unit_price}, ${item.options_json ? JSON.stringify(item.options_json) : null}, ${item.subtotal})
@@ -605,7 +607,7 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
         }
 
         // Create initial status history
-        await tx`
+        await q`
           INSERT INTO order_status_history (order_id, status, notes, created_by)
           VALUES (${order.id}, 'pending', 'Order placed', ${request.user!.userId})
         `;
@@ -736,7 +738,7 @@ export default async function ordersRoutes(fastify: FastifyInstance): Promise<vo
       // Update order status
       await db
         .update(orders)
-        .set({ status: status as typeof orders.status.dataType, updatedAt: new Date() })
+        .set({ status: status as 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled', updatedAt: new Date() })
         .where(eq(orders.id, parseInt(id)));
 
       // Add to status history

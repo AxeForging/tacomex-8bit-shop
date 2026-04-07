@@ -9,7 +9,7 @@ export interface JwtPayload {
 
 // Extended FastifyRequest with user
 export interface AuthRequest extends FastifyRequest {
-  user?: JwtPayload;
+  user: JwtPayload;
 }
 
 // API Error interface
@@ -45,7 +45,7 @@ export interface OrderItemInput {
 // Declare module augmentation for Fastify
 declare module 'fastify' {
   interface FastifyRequest {
-    user?: JwtPayload;
+    user: JwtPayload;
   }
 }
 

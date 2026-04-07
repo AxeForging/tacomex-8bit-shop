@@ -36,9 +36,9 @@ export const users = pgTable('users', {
   avatarUrl: varchar('avatar_url', { length: 500 }),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
-}, (table) => [
-  check('role_check', sql`${table.role} IN ('customer', 'admin')`),
-]);
+}, (table) => ({
+  roleCheck: check('role_check', sql`${table.role} IN ('customer', 'admin')`),
+}));
 
 export const usersRelations = relations(users, ({ many }) => ({
   orders: many(orders),
@@ -84,9 +84,9 @@ export const products = pgTable('products', {
   calories: integer('calories'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
-}, (table) => [
-  check('spice_level_check', sql`${table.spiceLevel} >= 0 AND ${table.spiceLevel} <= 5`),
-]);
+}, (table) => ({
+  spiceLevelCheck: check('spice_level_check', sql`${table.spiceLevel} >= 0 AND ${table.spiceLevel} <= 5`),
+}));
 
 export const productsRelations = relations(products, ({ one, many }) => ({
   category: one(categories, {
@@ -109,9 +109,9 @@ export const productOptions = pgTable('product_options', {
   optionType: varchar('option_type', { length: 50 }).notNull().$type<'size' | 'extra' | 'sauce' | 'side'>(),
   priceModifier: decimal('price_modifier', { precision: 10, scale: 2 }).default('0'),
   isDefault: boolean('is_default').default(false),
-}, (table) => [
-  check('option_type_check', sql`${table.optionType} IN ('size', 'extra', 'sauce', 'side')`),
-]);
+}, (table) => ({
+  optionTypeCheck: check('option_type_check', sql`${table.optionType} IN ('size', 'extra', 'sauce', 'side')`),
+}));
 
 export const productOptionsRelations = relations(productOptions, ({ one }) => ({
   product: one(products, {
@@ -137,9 +137,9 @@ export const promotions = pgTable('promotions', {
   expiresAt: timestamp('expires_at').notNull(),
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at').defaultNow(),
-}, (table) => [
-  check('discount_type_check', sql`${table.discountType} IN ('percentage', 'fixed')`),
-]);
+}, (table) => ({
+  discountTypeCheck: check('discount_type_check', sql`${table.discountType} IN ('percentage', 'fixed')`),
+}));
 
 export const promotionsRelations = relations(promotions, ({ many }) => ({
   orders: many(orders),
@@ -163,9 +163,9 @@ export const orders = pgTable('orders', {
   estimatedDelivery: timestamp('estimated_delivery'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
-}, (table) => [
-  check('status_check', sql`${table.status} IN ('pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled')`),
-]);
+}, (table) => ({
+  statusCheck: check('status_check', sql`${table.status} IN ('pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled')`),
+}));
 
 export const ordersRelations = relations(orders, ({ one, many }) => ({
   user: one(users, {
@@ -238,9 +238,9 @@ export const userFavorites = pgTable('user_favorites', {
   userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   productId: integer('product_id').notNull().references(() => products.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at').defaultNow(),
-}, (table) => [
-  primaryKey({ columns: [table.userId, table.productId] }),
-]);
+}, (table) => ({
+  pk: primaryKey({ columns: [table.userId, table.productId] }),
+}));
 
 export const userFavoritesRelations = relations(userFavorites, ({ one }) => ({
   user: one(users, {
@@ -268,9 +268,9 @@ export const notifications = pgTable('notifications', {
   isRead: boolean('is_read').default(false),
   metadata: jsonb('metadata'),
   createdAt: timestamp('created_at').defaultNow(),
-}, (table) => [
-  check('channel_check', sql`${table.channel} IN ('email', 'sms')`),
-]);
+}, (table) => ({
+  channelCheck: check('channel_check', sql`${table.channel} IN ('email', 'sms')`),
+}));
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, {

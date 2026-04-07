@@ -8,7 +8,7 @@ import { getJwtConfig } from '@/middleware/auth';
 import { errorHandler, notFoundHandler } from '@/middleware/errorHandler';
 import { redis } from '@/config/redis';
 import { connectRabbitMQ, closeRabbitMQ, testRabbitMQ } from '@/config/rabbitmq';
-import { testConnection } from '@/db';
+import { testConnection, runMigrations } from '@/db';
 import { registerSwagger } from '@/plugins/swagger';
 import { startConsumers } from '@/services/notificationConsumer';
 
@@ -249,6 +249,9 @@ async function start(): Promise<void> {
       console.error('Failed to connect to database');
       process.exit(1);
     }
+
+    // Run idempotent migrations before starting the server
+    await runMigrations();
 
     const fastify = await buildServer();
 

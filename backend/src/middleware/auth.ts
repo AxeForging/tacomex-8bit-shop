@@ -48,8 +48,7 @@ export async function optionalAuth(
   try {
     await request.jwtVerify();
   } catch {
-    // Token is invalid or missing, but we don't fail - just continue without user
-    request.user = undefined;
+    // Token is invalid or missing - continue without user (request.user stays unset)
   }
 }
 

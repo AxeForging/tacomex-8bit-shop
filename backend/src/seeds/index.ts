@@ -653,27 +653,30 @@ async function seedOrders(
   const adminId = userMap.get('admin@tacomex.com')!;
 
   await pgSql.begin(async (tx) => {
+    // TransactionSql extends Omit<Sql, ...> which drops call signatures — cast to restore them
+    const q = tx as unknown as typeof pgSql;
+
     // Order 1: Delivered order for demo customer
-    const [order1] = await tx`
+    const [order1] = await q`
       INSERT INTO orders (user_id, status, subtotal, discount_amount, tax_amount, total, delivery_address, delivery_notes, estimated_delivery, created_at)
       VALUES (${customerId}, 'delivered', 28.46, 0, 2.35, 30.81, '123 Pixel Street, Game City, TX 75001', 'Ring doorbell twice', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days')
       RETURNING id
     `;
 
     const productIds1 = [
-      productMap.get('pixel-carne-asada-taco'),
-      productMap.get('horchata-potion'),
-      productMap.get('churro-combo'),
+      productMap.get('pixel-carne-asada-taco')!,
+      productMap.get('horchata-potion')!,
+      productMap.get('churro-combo')!,
     ];
 
-    await tx`
+    await q`
       INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, subtotal)
       VALUES (${order1.id}, ${productIds1[0]}, 'Pixel Carne Asada Taco', 3, 4.49, 13.47),
              (${order1.id}, ${productIds1[1]}, 'Horchata Potion', 2, 3.49, 6.98),
              (${order1.id}, ${productIds1[2]}, 'Churro Combo', 1, 5.99, 5.99)
     `;
 
-    await tx`
+    await q`
       INSERT INTO order_status_history (order_id, status, notes, created_by, created_at)
       VALUES (${order1.id}, 'pending', 'Order placed', ${customerId}, NOW() - INTERVAL '2 days'),
              (${order1.id}, 'confirmed', 'Payment confirmed', ${adminId}, NOW() - INTERVAL '2 days' + INTERVAL '5 minutes'),
@@ -683,27 +686,27 @@ async function seedOrders(
     `;
 
     // Order 2: Preparing order for Maria
-    const promoId = promoMap.get('TACO20');
-    const [order2] = await tx`
+    const promoId = promoMap.get('TACO20')!;
+    const [order2] = await q`
       INSERT INTO orders (user_id, status, subtotal, discount_amount, tax_amount, total, promotion_id, delivery_address, created_at)
       VALUES (${mariaId}, 'preparing', 42.95, 8.59, 2.83, 37.19, ${promoId}, '456 Retro Avenue, Arcade Town, TX 75002', NOW() - INTERVAL '30 minutes')
       RETURNING id
     `;
 
     const productIds2 = [
-      productMap.get('ultimate-combo-burrito'),
-      productMap.get('pixel-chips-guacamole'),
-      productMap.get('agua-fresca-refresh'),
+      productMap.get('ultimate-combo-burrito')!,
+      productMap.get('pixel-chips-guacamole')!,
+      productMap.get('agua-fresca-refresh')!,
     ];
 
-    await tx`
+    await q`
       INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, subtotal)
       VALUES (${order2.id}, ${productIds2[0]}, 'Ultimate Combo Burrito', 2, 12.99, 25.98),
              (${order2.id}, ${productIds2[1]}, 'Pixel Chips & Guacamole', 1, 5.99, 5.99),
              (${order2.id}, ${productIds2[2]}, 'Agua Fresca Refresh', 2, 3.29, 6.58)
     `;
 
-    await tx`
+    await q`
       INSERT INTO order_status_history (order_id, status, notes, created_by, created_at)
       VALUES (${order2.id}, 'pending', 'Order placed', ${mariaId}, NOW() - INTERVAL '30 minutes'),
              (${order2.id}, 'confirmed', 'Payment confirmed', ${adminId}, NOW() - INTERVAL '25 minutes'),
@@ -711,24 +714,24 @@ async function seedOrders(
     `;
 
     // Order 3: Pending order for demo customer
-    const [order3] = await tx`
+    const [order3] = await q`
       INSERT INTO orders (user_id, status, subtotal, discount_amount, tax_amount, total, delivery_address, delivery_notes, created_at)
       VALUES (${customerId}, 'pending', 19.96, 0, 1.65, 21.61, '123 Pixel Street, Game City, TX 75001', 'Please include extra napkins', NOW() - INTERVAL '5 minutes')
       RETURNING id
     `;
 
     const productIds3 = [
-      productMap.get('fireball-al-pastor-taco'),
-      productMap.get('steak-slayer-quesadilla'),
+      productMap.get('fireball-al-pastor-taco')!,
+      productMap.get('steak-slayer-quesadilla')!,
     ];
 
-    await tx`
+    await q`
       INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, subtotal)
       VALUES (${order3.id}, ${productIds3[0]}, 'Fireball Al Pastor Taco', 2, 4.49, 8.98),
              (${order3.id}, ${productIds3[1]}, 'Steak Slayer Quesadilla', 1, 11.99, 11.99)
     `;
 
-    await tx`
+    await q`
       INSERT INTO order_status_history (order_id, status, notes, created_by, created_at)
       VALUES (${order3.id}, 'pending', 'Order placed', ${customerId}, NOW() - INTERVAL '5 minutes')
     `;
